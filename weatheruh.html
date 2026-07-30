@@ -1406,7 +1406,19 @@ th {
 <!-- Floating Weather History Pop-up Drawer (Right Edge) -->
 <div class="history-drawer" id="historyDrawer">
     <div class="drawer-header">
-    <h3>Weather History</h3>
+    <div style="display: flex; align-items: center; gap: 8px;">
+            <h3 style="margin: 0;">Weather Log</h3>
+            <input 
+                type="number" 
+                id="maxHistoryInput" 
+                min="1" 
+                max="500" 
+                placeholder="30" 
+                title="Max history items to keep"
+                style="width: 48px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; border: 1px solid var(--border-color, #444); background: rgba(0, 0, 0, 0.2); color: inherit; text-align: center;"
+                oninput="updateMaxHistoryLimit(this.value)"
+            />
+        </div>
     <div class="drawer-header-actions">
             <button class="btn-clear-history" onclick="clearAllHistory()" title="Clear all history entries">🗑️ Clear</button>
             <button class="btn-copy-history" onclick="copyHistoryToClipboard()" title="Copy all history to clipboard">📋 Copy</button>
@@ -1931,6 +1943,13 @@ let currentAltitudeStep = 0; // Default to Sea Level
 // Initialize global tracking variable if not already declared
 let currentAltitudeFt = 0;
 //the altitude of the current day should get inherited into the next days elevation
+let maxHistoryLimit = 30;
+
+// Unique keys for localStorage
+const MAX_HISTORY_STORAGE_KEY = 'weather_app_max_history';
+const HISTORY_STORAGE_KEY = 'weather_app_history';
+const TERRAIN_STORAGE_KEY = 'weather_app_selected_terrain';
+const SEASON_STORAGE_KEY = "selectedSeason";
 
 
 // Load initial saved favorites from localStorage
@@ -2284,6 +2303,38 @@ function formatMod(val) {
     return val >= 0 ? `+${val}` : `${val}`;
 }
 
+function getMaxHistoryLimit() {
+    const input = document.getElementById("maxHistoryInput");
+    if (input && input.value !== "") {
+        const val = parseInt(input.value, 10);
+        if (!isNaN(val) && val > 0) return val;
+    }
+    return maxHistoryLimit;
+}
+
+function updateMaxHistoryLimit(val) {
+    const parsed = parseInt(val, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+        maxHistoryLimit = parsed;
+        try {
+            localStorage.setItem(MAX_HISTORY_STORAGE_KEY, parsed.toString());
+        } catch (e) {}
+    } else {
+        try {
+            localStorage.removeItem(MAX_HISTORY_STORAGE_KEY);
+        } catch (e) {}
+    }
+
+    const limit = getMaxHistoryLimit();
+    if (rollHistory.length > limit) {
+        rollHistory = rollHistory.slice(0, limit);
+        saveHistoryToLocalStorage(rollHistory);
+        renderHistory();
+    }
+}
+
+
+
 
 function updateResultRowTip(elementId, resultText) {
     const row = document.getElementById(elementId)?.closest(".result-row");
@@ -2337,35 +2388,39 @@ function evaluateSingleGroundStep(prevState, precipText, tempText, incrementStre
     const isFair         = lowerPrecip.includes("clear") || lowerPrecip.includes("cloudy") || 
                            lowerPrecip.includes("overcast") || lowerPrecip.includes("sunbaked");
 
-
     const daytime = incrementStreaks;
 
-    // 1. Apply ground duration triggers set from the PREVIOUS day's threshold hit when it's daytime and not the night of the same day
-    if (daytime) {
-        if (add7mudnextday) mud = 7;
-        if (add7snownextday) snow = 7;
-    }
+    // Track if new snow/mud was assigned TODAY so it doesn't decay on its first day
+    let freshlyAddedSnow = false;
+    let freshlyAddedMud  = false;
 
-    // Reset next-day flags before checking current day's precipitation
-    add7mudnextday = false;
-    add7snownextday = false;
-
-    // 2. Update precipitation streak counters
     if (daytime) {
+        // Step A: Consume yesterday's queued triggers
+        if (add7mudnextday) {
+            mud = 7;
+            freshlyAddedMud = true;
+        }
+        if (add7snownextday) {
+            snow = 7;
+            freshlyAddedSnow = true;
+        }
+
+        // Step B: CLEAR FLAGS IMMEDIATELY after applying them
+        add7mudnextday = false;
+        add7snownextday = false;
+
+        // Step C: Streak updates & new precip triggers
         rain    = lowerPrecip.includes("rainy")   ? rain + 1    : 0;
         drizzly = lowerPrecip.includes("drizzly") ? drizzly + 1 : 0;
         snowy   = lowerPrecip.includes("snowy")   ? snowy + 1   : 0;
         flurry  = lowerPrecip.includes("flurry")  ? flurry + 1  : 0;
-    }
 
-    // 3. Queue mud/snow to trigger TOMORROW if threshold is met today
-    if (rain >= 1 || drizzly >= 3) add7mudnextday = true;
-    if (snowy >= 1 || flurry >= 3) add7snownextday = true;
+        if (rain >= 1 || drizzly >= 3) add7mudnextday = true;
+        if (snowy >= 1 || flurry >= 3) add7snownextday = true;
 
-    if(daytime){
-        // 4. Process Mud Decay & Ice Transformation
+        // Step D: Process Mud Decay & Ice
         ice = false;
-        if (mud > 0) {
+        if (mud > 0 && !freshlyAddedMud) {
             if (isSweltering) {
                 mud = 0;
             } else if (isColdOrFrigid) {
@@ -2375,18 +2430,25 @@ function evaluateSingleGroundStep(prevState, precipText, tempText, incrementStre
             }
         }
 
-        // 5. Process Snow Melting
-        if (snow > 0) {
+
+
+        // Step E: Process Snow Melting (Runs LAST)
+        if (snow > 0 && !freshlyAddedSnow) {
+            
+
             if (isSweltering) { 
-                snow = 0;
-                mud = 0;
-            } 
-            if (isModerate) {
+                snow = 0; // Extreme heat completely vaporizes snow
+            } else if (isModerate) {
                 snow = Math.max(0, snow - 1);
             }
-            if (snow === 0) add7mudnextday = true; // Melting snow creates mud tomorrow
+        }
+
+        // Queue mud ONLY when snow naturally melts to 0 on moderate days
+        if (snow === 0) {
+            mud=7;
         }
     }
+
     return { drizzly, flurry, snowy, rain, snow, mud, ice, add7mudnextday, add7snownextday };
 }
 
@@ -2644,7 +2706,10 @@ function renderDayNightUI() {
 
 function addHistoryEntry(entry) {
     rollHistory.unshift(entry);
-    if (rollHistory.length > 30) { 
+    
+    // Dynamically cap history based on user setting or default
+    const limit = getMaxHistoryLimit();
+    while (rollHistory.length > limit) { 
         rollHistory.pop();
     }
 
@@ -2739,10 +2804,7 @@ function showCopyToast(message) {
     }, 1500);
 }
 
-// Unique keys for localStorage
-const HISTORY_STORAGE_KEY = 'weather_app_history';
-const TERRAIN_STORAGE_KEY = 'weather_app_selected_terrain';
-const SEASON_STORAGE_KEY = "selectedSeason";
+
 
 function saveHistoryToLocalStorage(historyData) {
     try {
@@ -3062,6 +3124,16 @@ window.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
         console.error("Could not load season from localStorage", e);
     }
+
+    // In window.addEventListener("DOMContentLoaded", ...) restore the saved value:
+try {
+    const savedLimit = localStorage.getItem(MAX_HISTORY_STORAGE_KEY);
+    if (savedLimit) {
+        maxHistoryLimit = parseInt(savedLimit, 10) || 30;
+        const limitInput = document.getElementById("maxHistoryInput");
+        if (limitInput) limitInput.value = maxHistoryLimit;
+    }
+} catch (e) {}
     
     selectSeason(savedSeason);
 
