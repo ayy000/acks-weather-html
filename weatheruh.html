@@ -1,0 +1,3075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAk0lEQVRoge3YsQmEQBBA0fPYLixCbMnkwIIMxeI0swAT8RrQbBY/w3+hwQyfAYNt1uO6Pi/Zl7hZ37hR7zKExhAaQ2gMoTGExhAaQ2gMoSntPFZfsg1T9R1pLmIIjSE0aUJK6LT+vP0c+RD3JM1FDKExhCb2r/Wg637Vd6S5iCE0htAYQmMIjSE0htAYQmMITZqQP9fWDE/OVCmnAAAAAElFTkSuQmCC" />
+   <title>ACKS II Weather Generator</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1e1e24;
+            --sidebar-bg: #18181c;
+            --bg-light: #0a205a;
+            --text-color: #d1d5dd;
+            --text-dim: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --border-color: #2e2e38;
+            --selected-bg: #1e293b;
+            --day-bright: #fef08a;
+            --day-text: #fef9c3;
+            --night-dim: #93c5fd;
+            --night-text: #cbd5e1;
+            --hover-bg: #272730;
+            --badge-bg: #334155;          /* Dark slate background */
+            --badge-text: #f8fafc;        /* White/light text */
+            --badge-border: #475569;      /* Subtle border */  
+            --chip-temp-bg: #3e2723;
+            --chip-temp-text: #ffcc80;
+            --chip-temp-border: #8d6e63;
+
+        /* Day Chips (Yellows & Oranges) */
+            --chip-day-temp-bg: #242000;
+            --chip-day-temp-text: #e0d386;
+            --chip-day-temp-border: #7c5f00;
+
+            --chip-day-precip-bg: #082063;
+            --chip-day-precip-text: #9fb2f5;
+            --chip-day-precip-border: #003d99;
+
+            --chip-day-wind-bg: #220003;
+            --chip-day-wind-text: #e77c97;
+            --chip-day-wind-border: #550023;
+
+            /* Night Chips (Blues) */
+            --chip-night-temp-bg: #171a0c;
+            --chip-night-text-color: #cac588;
+            --chip-night-temp-border: #5b5f1b;
+
+            --chip-night-precip-bg: #020314;
+            --chip-night-precip-text: #8a8ce5;
+            --chip-night-precip-border: #021166;
+
+            --chip-night-wind-bg: #180008;
+            --chip-night-wind-text: #8d485d;
+            --chip-night-wind-border: #4e0417;
+
+            /* Ground Condition Chips (Dark Mode) */
+            --chip-ground-bg: #332a1e;
+            --chip-ground-text: #e2b881;
+            --chip-ground-border: #8c6738;
+
+            --chip-ground-result-bg: #1b382b;
+            --chip-ground-result-text: #86efac;
+            --chip-ground-result-border: #22c55e;
+
+            /* History Entry Card Backgrounds (Dark Mode) */
+            --history-card-bg: #1e1e24;           /* Overall entry card background */
+            --history-day-bg: #2d2318;            /* Day section background */
+            --history-night-bg: #182232;          /* Night section background */
+            --history-card-border: #263f66;       /* Card border outline */
+
+            /* History Entry Shadow (Dark Mode - stronger blur and opacity for depth against dark backgrounds) */
+            --history-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+            /* Corner Tooltip */
+            --tooltip-bg: #1e1e24;
+            --tooltip-text: #d1d5dd;
+            --tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+            /* Day / Night Panels */
+            --panel-day-bg: #2d2318;
+            --panel-day-border: #8c6738;
+            --panel-night-bg: #182232;
+            --panel-night-border: #263f66;
+
+            /* Table Headers & Summary Bars */
+            --table-header-bg: #1e1e24;
+
+            /* Inactive Season Buttons */
+            --btn-season-inactive-bg: #1e1e24;
+            --btn-season-hover-bg: #272730;
+            --btn-season-hover-text: #38bdf8;
+
+            --bg-input: #18181c;
+            --btn-control-bg: #272730;
+            --btn-control-hover: #334155;
+        }
+
+            /* Light Mode Variable Overrides */
+    body.light-mode {
+        --bg-color: #f1f5f9;
+        --card-bg: #ffffff;
+        --bg-light: #fdeac8;
+        --sidebar-bg: #f8fafc;
+        --text-color: #0f172a;
+        --text-dim: #64748b;
+        --accent-color: #ff7300;
+        --accent-hover: #ffb039;
+        --border-color: #cbd5e1;
+        --selected-bg: #e2e8f0;
+        --day-bright: #854d0e;
+        --day-text: #713f12;
+        --night-dim: #1e40af;
+        --night-text: #1e3a8a;
+        --hover-bg: #cbd5e1;
+        --badge-bg: #e2e8f0;          /* Light slate gray background */
+        --badge-text: #0f172a;        /* Dark slate text for high contrast */
+        --badge-border: #cbd5e1;      /* Border for light mode */
+        --chip-temp-bg: #ffe0b2;
+        --chip-temp-text: #e65100;
+        --chip-temp-border: #ffb74d;
+        
+        /* Day Chips (Light Yellows & Oranges) */
+        --chip-day-temp-bg: #fffde0;
+        --chip-day-temp-text: #794900;
+        --chip-day-temp-border: #ffc74d;
+
+        --chip-day-precip-bg: #e7f1ff;
+        --chip-day-precip-text: #006bcf;
+        --chip-day-precip-border: #2ba0ff;
+
+        --chip-day-wind-bg: #ffecf6;
+        --chip-day-wind-text: #bd005e;
+        --chip-day-wind-border: #ff43b1;
+
+        /* Night Chips (Light Blues) */
+        --chip-night-temp-bg: #fdece3;
+        --chip-night-text-color: #503210;
+        --chip-night-temp-border: #f3dd9f;
+
+        --chip-night-precip-bg: #e0e9fa;
+        --chip-night-precip-text: #001b64;
+        --chip-night-precip-border: #80a2ea;
+
+        --chip-night-wind-bg: #f6e8f1;
+        --chip-night-wind-text: #7e1a65;
+        --chip-night-wind-border: #f18fe1;
+
+        /* Ground Condition Chips (Light Mode) */
+        --chip-ground-bg: #fef3c7;
+        --chip-ground-text: #92400e;
+        --chip-ground-border: #f59e0b;
+
+        --chip-ground-result-bg: #dcfce7;
+        --chip-ground-result-text: #15803d;
+        --chip-ground-result-border: #86efac;
+
+        /* History Entry Card Backgrounds (Light Mode) */
+        --history-card-bg: #ffffff;           /* Overall entry card background */
+        --history-day-bg: #fff8f0;            /* Warm tint for Day section */
+        --history-night-bg: #f0f4f9;          /* Cool tint for Night section */
+        --history-card-border: #ffd884;       /* Card border outline */
+
+        /* History Entry Shadow (Light Mode - soft, subtle elevation shadow) */
+        /* Light Mode: Increase alpha from 0.08 to 0.20+ so it stands out on light grey/white */
+        --history-card-shadow: 0 6px 18px rgba(0, 0, 0, 0.18), 
+                            0 2px 6px rgba(0, 0, 0, 0.12);
+
+        /* Corner Tooltip */
+        --tooltip-bg: #ffffff;
+        --tooltip-text: #0f172a;
+        --tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+        /* Day / Night Panels */
+        --panel-day-bg: #fefce8;
+        --panel-day-border: #fef08a;
+        --panel-night-bg: #eff6ff;
+        --panel-night-border: #bfdbfe;
+
+        /* Table Headers & Summary Bars */
+        --table-header-bg: #e2e8f0;
+
+        /* Inactive Season Buttons */
+        --btn-season-inactive-bg: #e2e8f0;
+        --btn-season-hover-bg: #cbd5e1;
+        --btn-season-hover-text: #0f172a;
+
+        --bg-input: #ffffff;
+        --btn-control-bg: #e2e8f0;
+        --btn-control-hover: #cbd5e1;
+    }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 4px 20px;
+
+            box-sizing: border-box;
+            height: 100vh;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout Grid */
+        .app-layout {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            overflow: hidden; /* Prevents layout overflow */
+        }
+
+        @media (max-width: 900px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h1, h2, h3 {
+            color: #ffffff;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        /* Hide scrollbar for Chrome, Safari, and Opera */
+        .history-list::-webkit-scrollbar {
+            display: none;
+        }
+        .history-list {
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        .history-card {
+            border-radius: 8px;
+            padding: 2px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color); /* Keeps inner text readable in both themes */
+        }
+
+        .history-card, 
+        .history-entry {
+            background-color: var(--history-card-bg);
+            border: 1px solid var(--history-card-border);
+            border-radius: 12px;
+
+
+            /* Apply the box shadow here */
+            box-shadow: var(--history-card-shadow);
+            
+            /* Optional smooth transition when toggling light/dark themes */
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        .history-entry-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            
+            /* Dimensions & Shape */
+            min-width: 10px;
+            height: 18px;
+            padding: 0 2px;
+            border-radius: 50px; /* Gives it a perfect circle / oval badge shape */
+            
+            /* Colors & Typography */
+            background-color: var(--bg-light);
+            color: var(--accent-color); /* Dark text for high contrast against accent color */
+            font-size: 0.7rem;
+            font-weight: 800;
+            line-height: 1;
+            
+            /* Spacing & Flex Behavior */
+            margin-right: 4px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .history-header { /* header of the history entries */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+            padding-left:6px;
+        }
+
+        .history-title-container {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            max-width: 215px;
+            cursor: help;
+        }
+
+        .history-terrain-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            
+            display: inline-block;
+            cursor: help;
+        }
+
+        .btn-delete-history {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            border-radius: 4px;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .btn-delete-history:hover {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-copy-history {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-copy-history:hover {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+        }
+
+
+        .history-roll-badge {
+            cursor: help;
+            border-bottom: 1px dotted var(--accent-color);
+        }
+
+        /* Global Tooltip fixed in body foreground to prevent clipping */
+        #globalTooltip {
+            position: fixed;
+            visibility: hidden;
+            opacity: 0;
+            top: 0;
+            left: 0;
+            background-color: #0f172a;
+            color: #f8fafc;
+            text-align: left;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: pre-line;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            z-index: 99999;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            pointer-events: none;
+        }
+
+        /* Day Section Chips (Shades of Yellow & Orange) */
+        .history-day .chip-temp {
+            background-color: var(--chip-day-temp-bg);
+            color: var(--chip-day-temp-text);
+            border-color: var(--chip-day-temp-border);
+        }
+
+        .history-day .chip-precip {
+            background-color: var(--chip-day-precip-bg);
+            color: var(--chip-day-precip-text);
+            border-color: var(--chip-day-precip-border);
+        }
+
+        .history-day .chip-wind {
+            background-color: var(--chip-day-wind-bg);
+            color: var(--chip-day-wind-text);
+            border-color: var(--chip-day-wind-border);
+        }
+
+        /* Night Section Chips (Shades of Blue) */
+        .history-night .chip-temp {
+            background-color: var(--chip-night-temp-bg);
+            color: var(--chip-night-text-color);
+            border-color: var(--chip-night-temp-border);
+        }
+
+        .history-night .chip-precip {
+            background-color: var(--chip-night-precip-bg);
+            color: var(--chip-night-precip-text);
+            border-color: var(--chip-night-precip-border);
+        }
+
+        .history-night .chip-wind {
+            background-color: var(--chip-night-wind-bg);
+            color: var(--chip-night-wind-text);
+            border-color: var(--chip-night-wind-border);
+        }
+
+        /* Ground Condition Chips */
+        .chip-ground {
+            background-color: var(--chip-ground-bg);
+            color: var(--chip-ground-text);
+            border-color: var(--chip-ground-border);
+        }
+
+        /* Green Ground Condition Chip for Current Results */
+        .chip-ground-result {
+            background-color: var(--chip-ground-result-bg);
+            color: var(--chip-ground-result-text);
+            border: 1px solid var(--chip-ground-result-border);
+            font-size: 0.75rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            overflow: hidden; /* Keeps child elements contained */
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 0.8em;
+            color: var(--text-dim);
+        }
+
+        /* Season Buttons */
+        .season-btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-season {
+            background-color: #121214;
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .btn-season:hover:not(.active) {
+            background-color: #2a2a36;
+            color: #fff;
+        }
+
+        .btn-season.active {
+            background-color: var(--accent-color);
+            color: #000;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+            height: 32px;
+            padding: 0 18px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Dual Results Grid */
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+
+        .results-panel {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .panel-day {
+            background-color: #272722;
+            border-color: #524e2a;
+        }
+
+        .panel-night {
+            background-color: #19202e;
+            border-color: #2d3b54;
+        }
+
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+
+        .panel-day .panel-title { color: var(--day-bright); }
+        .panel-night .panel-title { color: var(--night-dim); }
+
+        .result-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dotted var(--border-color);
+            padding-bottom: 2px;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 0.7em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .roll-badge {
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .panel-day .result-value {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--day-text);
+        }
+
+        .panel-night .result-value {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--night-text);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-y: auto; /* Enables internal table scrolling */
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            flex: 1 1 auto;
+            min-height: 0; /* CRITICAL: Enables scrolling instead of expanding page */
+            table-layout: fixed; /* Prevents columns from expanding when internal content changes */
+        }
+
+        table {
+            width: 100%;
+            height: auto; /* REMOVE height: 100% so rows maintain natural height */
+            border-collapse: collapse;
+            font-size: 0.85em;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #18181c;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr {
+            transition: background-color 0.15s;
+        }
+
+        tr:hover {
+            background-color:var(--hover-bg);
+            cursor: pointer;
+        }
+
+        tr.selected {
+            background-color: var(--selected-bg);
+            border-left: 3px solid var(--accent-color);
+        }
+
+        tr.favorited {
+            background-color: rgba(234, 179, 8, 0.14);
+        }
+
+        tr.favorited:hover {
+            background-color: rgba(234, 179, 8, 0.24);
+        }
+
+        tr.favorited.selected {
+            background-color: rgba(234, 179, 8, 0.35);
+            border-left: 3px solid var(--accent-color);
+            box-shadow: inset 2px 0 0 #facc15;
+        }
+
+        .badge {
+            white-space: nowrap;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            /* Variable Theme Control */
+            background-color: var(--badge-bg);
+            color: var(--badge-text);
+            border: 1px solid var(--badge-border);
+
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 33px;         /* Keeps 2-letter and 3-letter badges strictly contained */
+            text-align: center;  /* Keeps codes neatly centered in their box */
+        }
+
+        .action-cell {
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .btn-fav-mini {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 2px 5px;
+            margin-right: 4px;
+            line-height: 1;
+            vertical-align: middle;
+            transition: transform 0.15s ease, color 0.15s ease;
+        }
+
+        .btn-fav-mini:hover {
+            transform: scale(1.25);
+            color: #facc15;
+        }
+
+        .btn-fav-mini.active {
+            color: #facc15;
+        }
+
+        .btn-roll-mini {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .btn-roll-mini:hover {
+            background: var(--accent-color);
+            color: var(--text-color);
+        }
+
+        .roll-summary-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background-color: #18181c;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            align-items: center;
+            justify-content: space-between;   
+        }
+        /* Floating Bottom-Right Toggle Button */
+        .fab-history-toggle {
+            position: relative;
+            width: 44px;              /* Standard button size */
+            height: 44px;
+            border-radius: 8px;       /* Makes it a squircle (rounded square) */
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-clear-history {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-dim);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-clear-history:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.fab-history-toggle:hover {
+    background-color: var(--accent-color);
+    color: #000;
+    transform: scale(1.08);
+}
+
+.fab-history-toggle svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+}
+
+/* Floating Drawer Pop-up (Right Edge) */
+.history-drawer {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    bottom: 60px;
+    width: 370px;
+    max-width: calc(100vw - 40px);
+    background-color: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    padding: 0px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+    /* Off-screen transition */
+    transform: translateX(calc(100% + 30px));
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Override classes for manual button clicks */
+.history-drawer.open {
+    transform: translateX(0) !important;
+}
+
+.history-drawer.closed {
+    transform: translateX(calc(100% + 30px)) !important;
+}
+
+/* Desktop default: Keep drawer open */
+@media (min-width: 901px) {
+    .history-drawer {
+        transform: translateX(0); /* Displays on screen by default */
+    }
+}
+
+/* Mobile default: Keep drawer off-screen */
+@media (max-width: 900px) {
+    .history-drawer {
+        transform: translateX(calc(100% + 30px)); /* Hidden by default */
+    }
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2px;
+}
+
+.drawer-header h3 {
+    margin: 0;
+    padding:4px;
+    font-size: 1.05rem;
+    color: var(--text-dim); /* Automatically switches dark/light */
+}
+
+.drawer-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.table-wrapper {
+    flex: 1 1 auto; /* Allows growing AND shrinking */
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* CRITICAL: Allows flex items to shrink below content size */
+    overflow: hidden;
+}
+
+.history-empty {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 20px;
+}
+/* Target the bold title inside your tooltip class */
+.tooltip-class b {
+  display: block;          /* Ensures margin and spacing properties apply cleanly */
+  margin-top: 5px;         /* Adjust top distance as needed */
+  margin-bottom: 2px;      /* Reduces space between title and text below it */
+  line-height: 1.2;        /* Tightens line height */
+}
+
+/* Bottom-Left Fixed Tooltip Box */
+#cornerTooltip {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    visibility: hidden;
+    opacity: 0;
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: pre-line; /* CRITICAL: Preserves line breaks from weatherEffects */
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    z-index: 99999;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    max-width: 320px;
+}
+.result-row[data-corner-tip] {
+    cursor: help;
+}
+.result-row[data-corner-tip]:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* History Section Layouts for Chips */
+.history-section {
+    display: flex;
+    align-items: center;
+    
+    margin-top: 2px;
+}
+
+.history-section-label {
+    font-size: 0.75rem;
+    padding-right:2px;
+    font-weight: bold;
+    width: 30px; /* Fixed width keeps chips neatly aligned vertically */
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.history-day .history-section-label {
+    color: var(--text-color);
+}
+
+.history-night .history-section-label {
+    color: var(--text-color);
+}
+
+
+
+
+/* Base Chip Layout */
+/* Sharp and Compact Chip Styling */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1px;           /* Tighter horizontal padding */
+    height: 18px;             /* Enforces exact, uniform height across all chips */
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 2px;        /* Sharp, subtle corners (use 0px for razor sharp) */
+    border: 1px solid transparent;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* Adjust chip-container gap for compact layout */
+.chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    align-items: center;
+}
+
+/* Specific Chip Styles using the active CSS Variables */
+.chip-temp {
+    background-color: var(--chip-temp-bg);
+    color: var(--chip-temp-text);
+    border-color: var(--chip-temp-border);
+}
+
+.chip-precip {
+    background-color: var(--chip-precip-bg);
+    color: var(--chip-precip-text);
+    border-color: var(--chip-precip-border);
+}
+
+.chip-wind {
+    background-color: var(--chip-wind-bg);
+    color: var(--chip-wind-text);
+    border-color: var(--chip-wind-border);
+}
+
+/* Corner Tooltip */
+#cornerTooltip {
+    background-color: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    box-shadow: var(--tooltip-shadow);
+}
+
+/* Day & Night Panels */
+.panel-day {
+    background-color: var(--panel-day-bg);
+    border-color: var(--panel-day-border);
+}
+
+.panel-night {
+    background-color: var(--panel-night-bg);
+    border-color: var(--panel-night-border);
+}
+
+/* Table Headers & Summary Bar */
+.roll-summary-bar,
+th {
+    background-color: var(--table-header-bg);
+}
+
+/* Inactive Season Buttons */
+.btn-season:not(.active) {
+    background-color: var(--btn-season-inactive-bg);
+}
+
+.btn-season:hover:not(.active) {
+    background-color: var(--btn-season-hover-bg);
+    color: var(--btn-season-hover-text);
+}
+
+.active-terrain-text {
+    color: var(--accent-color);
+    font-weight: bold;
+    cursor: help;
+    border-bottom: 1px dotted var(--accent-color);
+}
+
+.history-altitude-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    padding: 0px 8px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 6px;
+    height: 20px;
+}
+
+.history-altitude-bar input[type="number"] {
+    width: 80px;
+    height:20px;
+    background: var(--bg-input, var(--card-bg));
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.history-altitude-bar .alt-mod-badge {
+    margin-left: auto;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* ==========================================================================
+   Elevation Control Group
+   ========================================================================== */
+.elevation-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-family: inherit;
+}
+
+.elevation-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.elevation-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    width: fit-content;
+    background-color: var(--bg-input, var(--card-bg));
+}
+
+/* Base style for +/- buttons */
+.elevation-btn {
+    background-color: var(--btn-control-bg, var(--hover-bg));
+    border: none;
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: bold;
+    width: 38px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.elevation-btn:hover {
+    background-color: var(--btn-control-hover, var(--selected-bg));
+    color: var(--accent-color);
+}
+
+.elevation-btn:active {
+    background-color: var(--border-color);
+}
+
+/* Middle input field */
+.elevation-input {
+    width: 80px;
+    border: none;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+}
+
+/* Hide webkit/firefox default number spinners */
+.elevation-input::-webkit-outer-spin-button,
+.elevation-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Standard modern syntax */
+.elevation-input {
+    appearance: textfield; 
+}
+
+/* Fallback / Cross-browser compatibility */
+.elevation-input::-webkit-outer-spin-button,
+.elevation-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.elevation-input[type=number] {
+    -moz-appearance: textfield; /* Can be safely removed if you want zero warnings, but harmless to keep for ancient Firefox versions */
+    appearance: textfield;
+}
+
+/* Shared base styles */
+.elevation-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Main UI specific height */
+.elevation-input-wrapper.main-elevation {
+    height: 28px;
+}
+.elevation-input-wrapper.main-elevation .elevation-input,
+.elevation-input-wrapper.main-elevation .elevation-btn {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* History Mini specific height */
+.elevation-input-wrapper.mini-elevation {
+    height: 20px;
+}
+.elevation-input-wrapper.mini-elevation .elevation-input,
+.elevation-input-wrapper.mini-elevation .elevation-btn {
+    height: 100%;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+}
+
+
+.elevation-input,
+.elevation-btn {
+    height: 100%; /* Fills the height of the parent wrapper */
+    box-sizing: border-box;
+    padding: 0 8px;
+}
+
+.history-altitude-bar .elevation-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 0.9rem;
+}
+
+.history-altitude-bar .elevation-input {
+    width: 60px;
+    height: 100%;
+    font-size: 0.8rem;
+}
+
+
+@media (max-width: 600px) {
+    /* Keeps the roll summary bar and button on ONE row */
+    .controls-grid {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    /* Add overscroll space after the table */
+    #terrainTable::after {
+        content: '';
+        display: block;
+        height: 64px; /* Adjust height to match 2-3 table rows */
+    }
+
+    body {
+        padding-top: 6px;
+        padding-left: 10px;
+        padding-right: 10px;
+        /* Uses 32px OR the phone's physical safe area, whichever is larger */
+        padding-bottom: max(50px, env(safe-area-inset-bottom));
+    }
+
+    .card {
+        padding: 10px;
+        gap: 6px; /* Reduced vertical gaps */
+    }
+
+    .result-row {
+        padding-bottom: 1px;
+    }
+
+    table {
+        font-size: 0.78em; /* Slightly smaller text for compact screens */
+    }
+
+    th, td {
+        padding: 4px 6px; /* Reduces row height so more rows fit on screen */
+    }
+
+    .btn-roll-mini {
+        padding: 1px 4px;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 650px) {
+    .results-container {
+        grid-template-columns: 1fr;
+    }
+}
+        
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- Main Area -->
+    <div class="main-content">
+        <!-- Unified Weather & Terrain Card -->
+        <div class="card">
+<div class="controls-grid">
+    <div class="control-group-wrapper">
+        <!-- Season Selection -->
+        <div class="season-btn-group" id="seasonBtnGroup">
+            <button type="button" class="btn-season active" data-season="winter" onclick="selectSeason('winter')">Winter</button>
+            <button type="button" class="btn-season" data-season="spring" onclick="selectSeason('spring')">Spring</button>
+            <button type="button" class="btn-season" data-season="summer" onclick="selectSeason('summer')">Summer</button>
+            <button type="button" class="btn-season" data-season="fall" onclick="selectSeason('fall')">Fall</button>
+        </div>
+    </div>
+</div>
+
+<div class="controls-grid">
+    <div class="roll-summary-bar">
+        <div>
+            <strong>Rolls:</strong> <span id="diceRoll" style="color: var(--accent-color); font-weight: bold;">-</span>
+            <span id="modifiedRollDisplay" style="color: var(--text-dim); margin-left: 10px; font-size: 0.9em;"></span>
+        </div>
+        <div id="terrainNameDisplay">
+            <span id="terrainCodeDisplay" style="color: var(--accent-color); font-weight: bold;">-</span><strong>: Day </strong>
+            <span id="terrainDayModDisplay" class="active-terrain-text">-</span><strong> Night </strong>
+            <span id="terrainNightModDisplay" class="active-terrain-text">-</span>
+        </div>
+    </div>
+    
+    <!-- Elevation Control + Roll Button Grouped Together -->
+    <div style="display: flex; align-items: flex-end; gap: 8px;">
+        <div class="elevation-control-group">
+            <div class="elevation-input-wrapper main-elevation">
+                <button type="button" class="elevation-btn" onclick="adjustElevation(-2000)">-</button>
+                <input 
+                    type="number" 
+                    id="mainElevationInput" 
+                    class="elevation-input" 
+                    value="0" 
+                    step="2000" 
+                    min="0" 
+                    max="20000" 
+                    oninput="syncElevationValues(this.value)"
+                >
+                <button type="button" class="elevation-btn" onclick="adjustElevation(2000)">+</button>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="generateWeather()">🎲 Roll</button>
+    </div>
+</div>
+            
+
+            <!-- Dual Results Container -->
+            <div class="results-container">
+                <!-- Day Result Box -->
+                <div class="results-panel panel-day">
+                    <div class="panel-title">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span>☀️ DAY RESULT</span>
+                            <span id="dayGroundChip"></span> <!-- Ground chip container -->
+                        </div>
+                        <span id="dayModsDisplay" style="font-size: 0.85rem; font-weight: normal;">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">
+                            Temperature <span id="dayTempRoll" class="roll-badge"></span>
+                        </span>
+                        <span class="result-value" id="dayTempResult">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">
+                            Precipitation <span id="dayPrecipRoll" class="roll-badge"></span>
+                        </span>
+                        <span class="result-value" id="dayPrecipResult">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">
+                            Wind <span id="dayWindRoll" class="roll-badge"></span>
+                        </span>
+                        <span class="result-value" id="dayWindResult">-</span>
+                    </div>
+                </div>
+
+                <!-- Night Result Box -->
+                <div class="results-panel panel-night">
+                    <div class="panel-title">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span>🌙 NIGHT RESULT</span>
+                            <span id="nightGroundChip"></span> <!-- Ground chip container -->
+                        </div>
+                        <span id="nightModsDisplay" style="font-size: 0.85rem; font-weight: normal;">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">
+                            Temperature <span id="nightTempRoll" class="roll-badge"></span>
+                        </span>
+                        <span class="result-value" id="nightTempResult">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">
+                            Precipitation <span id="nightPrecipRoll" class="roll-badge"></span>
+                        </span>
+                        <span class="result-value" id="nightPrecipResult">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">
+                            Wind <span id="nightWindRoll" class="roll-badge"></span>
+                        </span>
+                        <span class="result-value" id="nightWindResult">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrated Terrain Selection Table -->
+            <div class="table-wrapper">
+                <div class="table-container">
+                    <table id="terrainTable">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Biome</th>
+                                <th>ACKS II Terrain</th>
+                                <th style="text-align: right;">Quick Roll</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Buttons (Bottom Right) -->
+<div style="position: fixed; bottom: 8px; right: 20px; display: flex; gap: 10px; z-index: 1001;">
+    <!-- Light/Dark Mode Toggle Button -->
+    <button class="fab-history-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme">
+        <span id="themeIcon" style="font-size: 1.2rem;">☀️</span>
+    </button>
+
+    <!-- History Drawer Toggle Button -->
+    <button class="fab-history-toggle" id="toggleHistoryBtn" title="Toggle Weather History" aria-label="Toggle Weather History">
+        <svg viewBox="0 0 24 24">
+            <path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6s-.67-1.5-1.5-1.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/>
+        </svg>
+    </button>
+</div>
+
+
+<!-- Floating Weather History Pop-up Drawer (Right Edge) -->
+<div class="history-drawer" id="historyDrawer">
+    <div class="drawer-header">
+    <h3>Weather History</h3>
+    <div class="drawer-header-actions">
+            <button class="btn-clear-history" onclick="clearAllHistory()" title="Clear all history entries">🗑️ Clear</button>
+            <button class="btn-copy-history" onclick="copyHistoryToClipboard()" title="Copy all history to clipboard">📋 Copy</button>
+            <button class="btn-delete-history" onclick="toggleDrawer(false)" title="Close history" style="font-size: 1.2rem;">✕</button>
+        </div>
+    </div>
+    <div class="history-list" id="rollHistory">
+        <div class="history-empty">
+            No rolls generated yet.
+        </div>
+    </div>
+</div>
+
+<!-- Global floating tooltip element outside scrollable containers -->
+<div id="globalTooltip"></div>
+<div id="cornerTooltip"></div>
+
+<script>
+// ==========================================
+// 0. IMMEDIATE THEME INITIALIZATION (Prevents Flicker)
+// ==========================================
+(function initTheme() {
+    try {
+        if (localStorage.getItem('acks_theme') === 'light') {
+            document.body.classList.add('light-mode');
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.textContent = '🌙';
+        }
+    } catch (e) {}
+})();
+
+// ==========================================
+// 1. DATA OBJECTS
+// ==========================================
+
+const weatherResultsTable = {
+    "-7": { tempLeq0: "Frigid (-75 F or less)", tempGtr0: "-", precipitation: "Sunbaked", wind: "Still" },
+    "-6": { tempLeq0: "Frigid (-65 to -74 F)", tempGtr0: "-", precipitation: "Sunbaked", wind: "Still" },
+    "-5": { tempLeq0: "Frigid (-55 to -64 F)", tempGtr0: "-", precipitation: "Sunbaked", wind: "Still" },
+    "-4": { tempLeq0: "Frigid (-50 to -54 F)", tempGtr0: "-", precipitation: "Sunbaked", wind: "Still" },
+    "-3": { tempLeq0: "Frigid (-40 to -49 F)", tempGtr0: "-", precipitation: "Sunbaked", wind: "Still" },
+    "-2": { tempLeq0: "Frigid (-25 to -39 F)", tempGtr0: "-", precipitation: "Sunbaked", wind: "Still" },
+    "-1": { tempLeq0: "Frigid (-12 to -24 F)", tempGtr0: "-", precipitation: "Clear", wind: "Still" },
+    "0":  { tempLeq0: "Frigid (-6 to -11 F)", tempGtr0: "Very Chilly (33 to 36 F)", precipitation: "Clear", wind: "Still" },
+    "1":  { tempLeq0: "Frigid (-5 to 0 F)", tempGtr0: "Very Chilly (37 to 40 F)", precipitation: "Clear", wind: "Still" },
+    "2":  { tempLeq0: "Cold (6 to 15 F)", tempGtr0: "Chilly (41 to 50 F)", precipitation: "Clear", wind: "Still" },
+    "3":  { tempLeq0: "Cold (16 to 25 F)", tempGtr0: "Chilly (51 to 56 F)", precipitation: "Clear", wind: "Still" },
+    "4":  { tempLeq0: "Cold (26 to 32 F)", tempGtr0: "Chilly (57 to 62 F)", precipitation: "Partly Cloudy", wind: "Still" },
+    "5":  { tempLeq0: "Very Chilly (33 to 36 F)", tempGtr0: "Brisk (63 to 67 F)", precipitation: "Mostly Cloudy", wind: "Gentle" },
+    "6":  { tempLeq0: "Very Chilly (37 to 40 F)", tempGtr0: "Balmy (68 to 71 F)", precipitation: "Overcast", wind: "Gentle" },
+    "7":  { tempLeq0: "Chilly (41 to 50 F)", tempGtr0: "Balmy (72 to 74 F)", precipitation: "Drizzly", wind: "Moderate" },
+    "8":  { tempLeq0: "Chilly (51 to 55 F)", tempGtr0: "Balmy (75 to 79 F)", precipitation: "Drizzly", wind: "Moderate" },
+    "9":  { tempLeq0: "Brisk (56 to 60 F)", tempGtr0: "Warm (80 to 82 F)", precipitation: "Drizzly", wind: "Moderate" },
+    "10": { tempLeq0: "Brisk (61 to 65 F)", tempGtr0: "Warm (83 to 86 F)", precipitation: "Rainy", wind: "Strong" },
+    "11": { tempLeq0: "Balmy (66 to 68 F)", tempGtr0: "Hot (87 to 90 F)", precipitation: "Rainy", wind: "Strong" },
+    "12": { tempLeq0: "Balmy (69 to 72 F)", tempGtr0: "Hot (91 to 94 F)", precipitation: "Rainy", wind: "Very Strong, Windy" },
+    "13": { tempLeq0: "-", tempGtr0: "Sweltering (95 to 99 F)", precipitation: "Rainy", wind: "Very Strong, Windy" },
+    "14": { tempLeq0: "-", tempGtr0: "Sweltering (100 to 104 F)", precipitation: "Rainy", wind: "Gale, Stormy" },
+    "15": { tempLeq0: "-", tempGtr0: "Sweltering (105 to 108 F)", precipitation: "Rainy", wind: "Gale, Stormy" },
+    "16": { tempLeq0: "-", tempGtr0: "Sweltering (109 to 112 F)", precipitation: "Rainy", wind: "Gale, Stormy" },
+    "17": { tempLeq0: "-", tempGtr0: "Sweltering (113 to 115 F)", precipitation: "Rainy", wind: "Gale, Stormy" },
+    "18": { tempLeq0: "-", tempGtr0: "Sweltering (116 to 120 F)", precipitation: "Rainy", wind: "Gale, Stormy" },
+    "19": { tempLeq0: "-", tempGtr0: "Sweltering (121 F or more)", precipitation: "Rainy", wind: "Gale, Stormy" }
+};
+
+const terrainCodes = [
+    {
+        Code: "Af", Name: "Tropical rainforest", Biome: "Rainforest", AcksType: "Jungle",
+        modifiers: {
+            winter: { tDay: 3, tNight: 0, p: -3, w: 2 },
+            spring: { tDay: 2, tNight: 0, p: -2, w: 0 },
+            summer: { tDay: 2, tNight: 0, p: -2, w: 0 },
+            fall:   { tDay: 1, tNight: 0, p: -1, w: 0 }
+        }
+    },
+    {
+        Code: "Am", Name: "Tropical monsoon", Biome: "Rainforest", AcksType: "Jungle",
+        modifiers: {
+            winter: { tDay: 2, tNight: 0, p: -1, w: 2 },
+            spring: { tDay: 7, tNight: 0, p: -1, w: 0 },
+            summer: { tDay: 6, tNight: 0, p: 4,  w: 0 },
+            fall:   { tDay: 4, tNight: 0, p: -1, w: 0 }
+        }
+    },
+    {
+        Code: "Aw", Name: "Tropical savanna with a dry winter", Biome: "Savanna", AcksType: "Grassland (savanna)",
+        modifiers: {
+            winter: { tDay: 5, tNight: 0, p: -5, w: 2 },
+            spring: { tDay: 4, tNight: 0, p: -4, w: 0 },
+            summer: { tDay: 3, tNight: 0, p: -1, w: 0 },
+            fall:   { tDay: 3, tNight: 0, p: -4, w: 0 }
+        }
+    },
+    {
+        Code: "As", Name: "Tropical savanna with a dry summer", Biome: "Savanna", AcksType: "Grassland (savanna)",
+        modifiers: {
+            winter: { tDay: 4, tNight: 0, p: -1, w: 2 },
+            spring: { tDay: 4, tNight: 0, p: -2, w: 0 },
+            summer: { tDay: 4, tNight: 0, p: -5, w: 0 },
+            fall:   { tDay: 4, tNight: 0, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "BWh", Name: "Hot arid desert", Biome: "Desert", AcksType: "Desert (sandy or rocky)",
+        modifiers: {
+            winter: { tDay: 1, tNight: 0, p: -5, w: 2 },
+            spring: { tDay: 6, tNight: 0, p: -5, w: 0 },
+            summer: { tDay: 7, tNight: 2, p: -5, w: 0 },
+            fall:   { tDay: 4, tNight: 0, p: 0,  w: 0 }
+        }
+    },
+    {
+        Code: "BWk", Name: "Cold arid desert", Biome: "Desert", AcksType: "Desert (sandy or rocky)",
+        modifiers: {
+            winter: { tDay: 0, tNight: -4, p: -4, w: 2 },
+            spring: { tDay: 0, tNight: 0,  p: -5, w: 0 },
+            summer: { tDay: 2, tNight: 0,  p: -4, w: 0 },
+            fall:   { tDay: 0, tNight: -1, p: -5, w: 0 }
+        }
+    },
+    {
+        Code: "BSh", Name: "Hot semi-arid steppe", Biome: "Semi-Arid Desert", AcksType: "Barrens (rocky)",
+        modifiers: {
+            winter: { tDay: 6, tNight: 0, p: -5, w: 2 },
+            spring: { tDay: 7, tNight: 3, p: -3, w: 0 },
+            summer: { tDay: 6, tNight: 2, p: -2, w: 0 },
+            fall:   { tDay: 6, tNight: 2, p: -5, w: 0 }
+        }
+    },
+    {
+        Code: "BSk", Name: "Cold semi-arid steppe", Biome: "Steppe", AcksType: "Grassland (steppe)",
+        modifiers: {
+            winter: { tDay: 0, tNight: -1, p: -4, w: 2 },
+            spring: { tDay: 1, tNight: 0,  p: -4, w: 0 },
+            summer: { tDay: 4, tNight: 0,  p: -5, w: 0 },
+            fall:   { tDay: 0, tNight: 0,  p: -4, w: 0 }
+        }
+    },
+    {
+        Code: "Csa", Name: "Temperate with a dry hot summer", Biome: "Scrub", AcksType: "Scrubland (low, sparse or high, dense)",
+        modifiers: {
+            winter: { tDay: 0, tNight: 0, p: -4, w: 2 },
+            spring: { tDay: 1, tNight: 0, p: -4, w: 0 },
+            summer: { tDay: 3, tNight: 0, p: -4, w: 0 },
+            fall:   { tDay: 1, tNight: 0, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Csb", Name: "Temperate with a dry warm summer", Biome: "Scrub or Forest", AcksType: "Scrubland (high, dense) or Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 0, tNight: 0, p: -2, w: 2 },
+            spring: { tDay: 0, tNight: 0, p: -3, w: 0 },
+            summer: { tDay: 2, tNight: 0, p: -4, w: 0 },
+            fall:   { tDay: 0, tNight: 0, p: -1, w: 0 }
+        }
+    },
+    {
+        Code: "Csc", Name: "Temperate with a dry cold summer", Biome: "Forest", AcksType: "Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 0, tNight: 0, p: 2,  w: 2 },
+            spring: { tDay: 0, tNight: 0, p: -3, w: 0 },
+            summer: { tDay: 0, tNight: 0, p: -3, w: 0 },
+            fall:   { tDay: 0, tNight: 0, p: -2, w: 0 }
+        }
+    },
+    {
+        Code: "Cwa", Name: "Temperate with a dry winter and hot summer", Biome: "Forest", AcksType: "Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 1, tNight: 0, p: -3, w: 2 },
+            spring: { tDay: 3, tNight: 0, p: -2, w: 0 },
+            summer: { tDay: 4, tNight: 2, p: -1, w: 2 },
+            fall:   { tDay: 2, tNight: 0, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Cwb", Name: "Temperate with a dry winter and warm summer", Biome: "Forest", AcksType: "Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 1, tNight: 0, p: -3, w: 2 },
+            spring: { tDay: 1, tNight: 0, p: -2, w: 0 },
+            summer: { tDay: 1, tNight: 0, p: -1, w: 2 },
+            fall:   { tDay: 1, tNight: 0, p: -5, w: 0 }
+        }
+    },
+    {
+        Code: "Cwc", Name: "Temperate with a dry winter and cold summer", Biome: "Forest", AcksType: "Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 0, tNight: 0, p: -3, w: 2 },
+            spring: { tDay: 0, tNight: 0, p: 0,  w: 0 },
+            summer: { tDay: 0, tNight: 0, p: 2,  w: 2 },
+            fall:   { tDay: 0, tNight: 0, p: -2, w: 0 }
+        }
+    },
+    {
+        Code: "Cfa", Name: "Temperate and damp year-round with a hot summer", Biome: "Forest", AcksType: "Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 0, tNight: 0, p: -3, w: 2 },
+            spring: { tDay: 2, tNight: 0, p: -2, w: 0 },
+            summer: { tDay: 4, tNight: 1, p: -1, w: 0 },
+            fall:   { tDay: 1, tNight: 0, p: -4, w: 0 }
+        }
+    },
+    {
+        Code: "Cfb", Name: "Temperate and damp year-round with a warm summer", Biome: "Forest", AcksType: "Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 0, tNight: 0, p: -1, w: 2 },
+            spring: { tDay: 1, tNight: 0, p: -1, w: 0 },
+            summer: { tDay: 3, tNight: 1, p: -1, w: 0 },
+            fall:   { tDay: 0, tNight: 0, p: -2, w: 0 }
+        }
+    },
+    {
+        Code: "Cfc", Name: "Temperate and damp year-round with a cold summer", Biome: "Taiga", AcksType: "Forest (taiga)",
+        modifiers: {
+            winter: { tDay: 0, tNight: -1, p: -3, w: 2 },
+            spring: { tDay: 0, tNight: 0,  p: -3, w: 0 },
+            summer: { tDay: 0, tNight: 0,  p: -3, w: 0 },
+            fall:   { tDay: 0, tNight: 0,  p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Dsa", Name: "Continental with a hot dry summer", Biome: "Forest", AcksType: "Forest (deciduous)",
+        modifiers: {
+            winter: { tDay: 0,  tNight: -2, p: -3, w: 2 },
+            spring: { tDay: 3,  tNight: 1,  p: -4, w: 0 },
+            summer: { tDay: 5,  tNight: 3,  p: -5, w: 0 },
+            fall:   { tDay: 2,  tNight: 1,  p: -4, w: 0 }
+        }
+    },
+    {
+        Code: "Dsb", Name: "Continental with a warm dry summer", Biome: "Taiga", AcksType: "Forest (taiga)",
+        modifiers: {
+            winter: { tDay: -2, tNight: -5, p: -4, w: 2 },
+            spring: { tDay: 1,  tNight: -2, p: -2, w: 0 },
+            summer: { tDay: 3,  tNight: 1,  p: -3, w: 0 },
+            fall:   { tDay: 0,  tNight: -1, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Dsc", Name: "Continental with a cold dry summer", Biome: "Taiga", AcksType: "Forest (taiga)",
+        modifiers: {
+            winter: { tDay: -2, tNight: -3, p: -2, w: 2 },
+            spring: { tDay: 1,  tNight: -1, p: -3, w: 0 },
+            summer: { tDay: 2,  tNight: -1, p: -2, w: 0 },
+            fall:   { tDay: -1, tNight: -1, p: -1, w: 0 }
+        }
+    },
+    {
+        Code: "Dwa", Name: "Continental with a dry winter and hot summer", Biome: "Steppe", AcksType: "Grassland (steppe)",
+        modifiers: {
+            winter: { tDay: 0, tNight: -3, p: -5, w: 2 },
+            spring: { tDay: 1, tNight: 0,  p: -4, w: 0 },
+            summer: { tDay: 3, tNight: 0,  p: -2, w: 0 },
+            fall:   { tDay: 0, tNight: 0,  p: -1, w: 0 }
+        }
+    },
+    {
+        Code: "Dwb", Name: "Continental with a dry winter and warm summer", Biome: "Steppe", AcksType: "Grassland (steppe)",
+        modifiers: {
+            winter: { tDay: -1, tNight: -3, p: -4, w: 2 },
+            spring: { tDay: 2,  tNight: 0,  p: -3, w: 0 },
+            summer: { tDay: 3,  tNight: 1,  p: -2, w: 0 },
+            fall:   { tDay: 0,  tNight: 0,  p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Dwc", Name: "Continental with a dry winter and cold summer", Biome: "Steppe", AcksType: "Grassland (steppe)",
+        modifiers: {
+            winter: { tDay: -1, tNight: -5, p: -4, w: 2 },
+            spring: { tDay: 0,  tNight: -3, p: -4, w: 0 },
+            summer: { tDay: 1,  tNight: -1, p: -2, w: 0 },
+            fall:   { tDay: 0,  tNight: -2, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Dwd", Name: "Continental with a dry winter and very cold winter", Biome: "Tundra", AcksType: "Barrens (tundra)",
+        modifiers: {
+            winter: { tDay: -9, tNight: -11, p: -3, w: 2 },
+            spring: { tDay: 0,  tNight: -4,  p: -4, w: 0 },
+            summer: { tDay: 2,  tNight: -2,  p: -3, w: 2 },
+            fall:   { tDay: -4, tNight: -7,  p: -5, w: 0 }
+        }
+    },
+    {
+        Code: "Dfa", Name: "Continental and damp year-round with a hot summer", Biome: "Prairie", AcksType: "Grassland (prairie)",
+        modifiers: {
+            winter: { tDay: -2, tNight: -4, p: -3, w: 2 },
+            spring: { tDay: 3,  tNight: -1, p: -2, w: 0 },
+            summer: { tDay: 4,  tNight: 2,  p: -4, w: 2 },
+            fall:   { tDay: 2,  tNight: -2, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Dfb", Name: "Continental and damp year-round with a warm summer", Biome: "Taiga", AcksType: "Forest (taiga)",
+        modifiers: {
+            winter: { tDay: -3, tNight: -4, p: -3, w: 2 },
+            spring: { tDay: 2,  tNight: -2, p: -2, w: 0 },
+            summer: { tDay: 3,  tNight: 1,  p: -3, w: 2 },
+            fall:   { tDay: 0,  tNight: -2, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Dfc", Name: "Continental and damp year-round with a cold summer", Biome: "Taiga", AcksType: "Forest (taiga)",
+        modifiers: {
+            winter: { tDay: -3, tNight: -5, p: -4, w: 2 },
+            spring: { tDay: 1,  tNight: -2, p: -4, w: 0 },
+            summer: { tDay: 2,  tNight: 0,  p: -3, w: 0 },
+            fall:   { tDay: -1, tNight: -2, p: -3, w: 0 }
+        }
+    },
+    {
+        Code: "Dfd", Name: "Continental and damp year-round with a very cold winter", Biome: "Taiga or Tundra", AcksType: "Forest (taiga) or Barrens (tundra)",
+        modifiers: {
+            winter: { tDay: -9, tNight: -11, p: -4, w: 2 },
+            spring: { tDay: 0,  tNight: -4,  p: -4, w: 0 },
+            summer: { tDay: 2,  tNight: -2,  p: -4, w: 0 },
+            fall:   { tDay: -5, tNight: -6,  p: -5, w: 0 }
+        }
+    },
+    {
+        Code: "ET", Name: "Polar tundra", Biome: "Tundra", AcksType: "Barrens (tundra)",
+        modifiers: {
+            winter: { tDay: -8, tNight: -11, p: -2, w: 2 },
+            spring: { tDay: 0,  tNight: -1,  p: -3, w: 0 },
+            summer: { tDay: 0,  tNight: 0,   p: -2, w: 0 },
+            fall:   { tDay: -1, tNight: -2,  p: -1, w: 0 }
+        }
+    },
+    {
+        Code: "EF", Name: "Polar ice cap", Biome: "Tundra", AcksType: "Barrens (tundra)",
+        modifiers: {
+            winter: { tDay: -11, tNight: -11, p: -5, w: -2 },
+            spring: { tDay: -11, tNight: -11, p: -5, w: 0 },
+            summer: { tDay: -11, tNight: -11, p: -5, w: 0 },
+            fall:   { tDay: -11, tNight: -11, p: -5, w: 0 }
+        }
+    }
+];
+
+const weatherEffects = {
+    frigid: {
+        title: "Frigid Temperatures (0° F and below)",
+        description: `• Expedition speed halved; foraging impossible.
+• Hypothermia sets in without protective clothing after 6 turns or if wet (loses 1d3 CON/hr until dead or warmed at campfire 1 hr; no force march/natural healing).
+• Hypothermia or cold damage requires daily Death save vs. frostbite (1d6 on Mortal Wounds Cold table).
+• Rest requires clothing/blankets AND campfire/heat source.
+• 7 consecutive days = 10% disease risk.
+• Cold resistance/immunity negates all effects except disease risk.
+
+<b>Frigid Temperatures</b>
+Frigid temperatures occur at 0° F and below. Adventurers in frigid temperature have their expedition speed halved and cannot forage. If the adventurer goes without protective clothing for more than six turns, or if he gets wet, he becomes hypothermic. A hypothermic adventurer cannot force march or heal wounds naturally and loses 1d3 CON each hour until the condition ends or his CON reaches 0, at which point he dies. The conditions end if the adventurer is able to warm himself by a campfire or other large heat source for at least one hour. An adventurer who becomes hypothermic or who suffers cold damage on any day must make a Death saving throw at the end of the day. If the save fails, he is frostbitten and must roll 1d6 on the 16-20 row of the Mortal Wounds – Cold table (p. 520), possibly losing fingers, toes, an ear, or even his nose. An adventurer cannot rest under frigid temperatures unless he has both protective clothing or blankets and a campfire or other large heat source. An adventurer who endures frigid temperatures for seven consecutive days has a 10% chance of catching a disease unless immune. An adventurer who is resistant or immune to cold damage suffers none of the above effects except the risk of disease.`
+    },
+    cold: {
+        title: "Cold Temperatures (above 0° F to below 32° F)",
+        description: `• Hypothermia sets in without protective clothing after 4 hrs (24 turns) or if wet (loses 1d3 CON/hr until dead or warmed at campfire 1 hr; no force march/natural healing).
+• Hypothermia or cold damage requires daily Death save vs. frostbite (1d6 on Mortal Wounds Cold table).
+• Rest requires clothing/blankets OR campfire/heat source.
+• 7 consecutive days = 5% disease risk.
+• Cold resistance/immunity negates all effects except disease risk.
+
+<b>Cold Temperatures</b>
+Cold temperatures are above 0° F and below 32° F. If the adventurer goes without protective clothing for more than four hours (24 turns), or if he gets wet, he becomes hypothermic. A hypothermic adventurer cannot force march or heal wounds naturally and loses 1d3 CON each hour until the condition ends or his CON reaches 0, at which point he dies. The conditions end if the adventurer is able to warm himself by a campfire or other large heat source for at least one hour. An adventurer who becomes hypothermic or who suffers cold damage on any day must make a Death saving throw at the end of the day. If the save fails, he is frostbitten and must roll 1d6 on the 16-20 row of the Mortal Wounds – Cold table (p. 520), possibly losing fingers, toes, an ear, or even his nose. An adventurer cannot rest under cold temperatures unless he has either protective clothing or blankets or a campfire or other large heat source. An adventurer who endures cold temperatures for seven consecutive days has a 5% chance of catching a disease unless immune. An adventurer who is resistant or immune to cold damage suffers none of the above effects except the risk of disease.`
+    },
+    moderate: {
+        title: "Moderate Temperatures (above 32° F to below 95° F)",
+        description: `• No mechanical effects.
+
+<b>Moderate Temperatures</b>
+Moderate temperatures are above 32° F and below 95° F. Moderate temperatures have no effect on gameplay. In the ACKS II Judges Journal, moderate temperatures are sub-divided into a range from very chilly to hot, but this is purely narrative.`
+    },
+    sweltering: {
+        title: "Sweltering Temperatures (95° F and higher)",
+        description: `• Expedition speed halved.
+• Wearing 5+ stone armor requires hourly Death save or become fatigued until armor shed 1 hr (avoid by reducing armor <5 stone).
+• Water rations increase +25%.
+• Dehydration loses 2d6 CON/day (instead of 1d6).
+• Fire resistance/immunity negates all effects.
+
+<b>Sweltering Temperatures</b>
+Sweltering temperatures are 95° F and higher. Adventurers in sweltering weather have their expedition speed halved. An adventurer wearing 5 stone or more of armor must make a Death saving throw each hour. If the throw fails, the adventurer becomes fatigued until he sheds his armor for at least one hour. (The adventurer can avoid this penalty by removing parts of his armor to reduce its encumbrance to less than 5 stone.) An adventurer’s required water ration is increased by 25%. If he becomes dehydrated, he loses 2d6 CON each day rather than 1d6. An adventurer who is resistant or immune to fire damage suffers none of the above effects.`
+    },
+    drizzly: {
+        title: "Drizzly Conditions (~1/4\" rain/day or short showers)",
+        description: `• -2 penalty to Foraging throws for firewood.
+• Mud forms after 3 consecutive days.
+
+<b>Drizzly Conditions</b>
+Drizzly conditions represent either short rain showers periodically through the day or light but continuous rainfall of about 1/4” per day. Foraging proficiency throws to find firewood suffer a -2 penalty. Mud forms after three days of Drizzly conditions.`
+    },
+    fair: {
+        title: "Fair Conditions",
+        description: `• No mechanical effects.
+
+<b>Fair Conditions</b>
+Fair conditions encompass any other type of precipitation condition that is not drizzly, foggy, flurry, rainy, snowy, or sunbaked. Chill days punctuated by short showers might make adventurers miserable, and warm days with gentle breezes might make adventurers happy, but neither has any game effect.`
+    },
+    flurry: {
+        title: "Flurry Conditions (~1/2\" snow/day or periodic flurries)",
+        description: `• -2 penalty to Foraging throws for firewood.
+• Snow forms after 3 consecutive days.
+
+<b>Flurry Conditions</b>
+Flurry conditions represent either periodic snow showers or light but continuous snow flurries at a rate of about 1/2” per day. Foraging proficiency throws to find firewood suffer a -2 penalty. Snow forms after three days of Flurry conditions.`
+    },
+    foggy: {
+        title: "Foggy Conditions (hazy mist, dense fog, or smoke)",
+        description: `• Max visibility drops to 20'.
+• Expedition speed halved for all purposes.
+• -4 penalty to Land Surveying, Navigation, Searching, and Tracking throws.
+
+<b>Foggy Conditions</b>
+Foggy conditions can arise from hazy mist, dense fog, or even smoke. During foggy conditions, maximum visibility distance drops to 20’ (which has a major effect on encounter distance, see p. 280). Land Surveying, Navigation, Searching, and Tracking proficiency throws also suffer a -4 penalty. Adventurers in foggy conditions have their speeds halved for all purposes. The Judge can increase or decrease the visibility and proficiency penalties to represent dense smog, light mist, etc.`
+    },
+    rainy: {
+        title: "Rainy Conditions (1\"+ rain/day)",
+        description: `• Max visibility halved; -2 penalty to missile attacks; earthen roads grant no benefit.
+• -2 penalty to Land Surveying, Navigation, and Searching throws.
+• -4 penalty to Foraging for firewood.
+• -4 penalty/hr to Tracking throws.
+• Mud forms after 1 day.
+• 7 consecutive days = 10% disease risk.
+
+<b>Rainy Conditions</b>
+Rainy conditions bring heavy or violent precipitation of at least 1” per day. During rainy conditions, maximum visibility distance drops to half range, all missile attacks suffer a -2 penalty, and earthen roads provide no benefit. Land Surveying, Navigation, and Searching proficiency throws suffer a -2 penalty. Foraging proficiency throws to find firewood suffer a -4 penalty. Tracking proficiency throws suffer a -4 penalty per hour. Mud forms after one day of Rainy conditions. An adventurer who endures rainy conditions for seven consecutive days has a 10% chance of catching a disease.`
+    },
+    snowy: {
+        title: "Snowy Conditions (10\"+ snow/day)",
+        description: `• Max visibility drops to 20'.
+• Expedition speed halved for all purposes.
+• -4 penalty to Land Surveying, Navigation, Searching, and Foraging for firewood.
+• -4 penalty/hr to Tracking throws.
+• Snow accumulates after 1 day.
+• 7 consecutive days = 10% disease risk.
+
+<b>Snowy Conditions</b>
+Snowy conditions bring heavy snowfall of at least 10” per day. During snowy weather, maximum visibility distance drops to 20’. Adventurers in snowy weather have their speed halved for all purposes. Land Surveying, Navigation, and Searching proficiency throws suffer a -4 penalty. Foraging proficiency throws to find firewood suffer a -4 penalty. Tracking proficiency throws suffer a -4 penalty per hour. Snow accumulates after a day of snowy weather. An adventurer who endures snowy conditions for seven consecutive days has a 10% chance of catching a disease unless immune to disease.`
+    },
+    sunbaked: {
+        title: "Sunbaked Conditions (bright, strong sunlight)",
+        description: `• -4 penalty to Foraging throws for water.
+• Travelers working/outdoors 4+ hours without protective clothing suffer 1 point of damage (negated by Savage Resilience).
+
+<b>Sunbaked Conditions</b>
+Sunbaked conditions have clear skies with bright strong sunlight. Foraging proficiency throws to find water suffer a -4 penalty. Adventurers without protective clothing suffer 1 point damage if they travel or work outdoors for 4 or more hours. Adventurers with the Savage Resilience class power never get sunburned, they just get dark and bronze.`
+    },
+    stormy: {
+        title: "Stormy Conditions (50+ mph wind)",
+        description: `• Missile attack and Listening proficiency throws -4.
+• Expedition speed quartered; air speed quartered in any terrain.
+• Unprotected flames automatically extinguished; protected flames extinguished unless bearer succeeds on Paralysis saving throw.
+• All characters affected each round as if by spell gale of wind.
+• Barrens/desert terrain only: max visibility reduced to 20', all speeds quartered, and Land Surveying, Navigation, Searching, and Tracking proficiency throws suffer -4 penalty.
+
+<b>Stormy Conditions</b>
+Stormy conditions prevail when wind speeds are 50mph or more. During storm conditions, all missile attack throws and Listening proficiency throws suffer a -4 penalty. Adventurers in stormy conditions have their expedition speed quartered. Air speed in any terrain is quartered. The force of the wind automatically extinguishes any candles, torches, or other unprotected flames. It extinguishes protected flames unless the bearer succeeds on a Paralysis saving throw. All characters are affected each round as if by the spell gale of wind. In barrens or desert terrain only, maximum visibility distance is reduced to 20’, all speeds are quartered, and Land Surveying, Navigation, Searching, and Tracking proficiency throws all suffer -4 penalties due to sand storms and dust clouds.`
+    },
+    windy: {
+        title: "Windy Conditions (25–50 mph wind)",
+        description: `• Missile attack and Listening proficiency throws -2.
+• Expedition speed halved; air speed halved in any terrain.
+• Barrens/desert terrain only: visibility reduced to 20', all speeds halved, and Land Surveying, Navigation, Searching, and Tracking proficiency throws suffer -4 penalty.
+
+<b>Windy Conditions</b>
+Windy conditions prevail when wind speeds are between 25 and 50mph. During windy conditions, all missile attack throws and Listening proficiency throws suffer a -2 penalty. Adventurers in windy conditions have their expedition speed halved. Air speed is halved in any terrain in windy conditions. In barrens or desert terrain only, visibility is reduced to 20’, all speeds are halved, and Land Surveying, Navigation, Searching, and Tracking proficiency throws all suffer -4 penalties due to sand storms and dust clouds.`
+    },
+    gentle: {
+        title: "Still / Gentle / Moderate Wind",
+        description: `• No mechanical effects.`
+    },
+    mud: {
+        title: "Mud",
+        description: `• Accumulates after 1 day Rainy or 3 days Drizzly in grasslands/scrublands.
+• Adventurer speeds halved for all purposes unless traveling on paved roads.
+• Earth and gravel roads provide no benefit; wheeled vehicles cannot move except on paved roads.
+• Dries in 1 day sweltering fair or 7 days moderate fair; freezes in 1 day cold/frigid fair.
+
+<b>Mud and Snow</b>
+Mud accumulates after one day of Rainy or three days of Drizzly conditions in grasslands or scrublands terrain. Once mud forms, adventurers have their speeds halved for all purposes unless traveling on paved roads. Earth and gravel roads provide no benefit in mud and wheeled vehicles cannot move in mud except on paved roads. Mud dries in one day of sweltering fair weather, or seven days of moderate fair weather and freezes in one day of cold or frigid fair weather.
+Snow accumulates after one day of Snowy or three days of Flurry conditions. Once snow accumulates, adventurers have their speeds halved for all purposes. Roads provide no benefit and wheeled vehicles cannot move in snow. Snow melts in seven days of moderate temperatures or one day of sweltering temperatures, creating mud`
+    },
+    snow: {
+        title: "Snow",
+        description: `• Accumulates after 1 day Snowy or 3 days Flurry.
+• Adventurer speeds halved for all purposes; roads provide no benefit; wheeled vehicles cannot move.
+• Melts in 7 days moderate or 1 day sweltering temperatures, creating mud.
+
+<b>Mud and Snow</b>
+Mud accumulates after one day of Rainy or three days of Drizzly conditions in grasslands or scrublands terrain. Once mud forms, adventurers have their speeds halved for all purposes unless traveling on paved roads. Earth and gravel roads provide no benefit in mud and wheeled vehicles cannot move in mud except on paved roads. Mud dries in one day of sweltering fair weather, or seven days of moderate fair weather and freezes in one day of cold or frigid fair weather.
+Snow accumulates after one day of Snowy or three days of Flurry conditions. Once snow accumulates, adventurers have their speeds halved for all purposes. Roads provide no benefit and wheeled vehicles cannot move in snow. Snow melts in seven days of moderate temperatures or one day of sweltering temperatures, creating mud`
+    },
+    ice: {
+        title: "Ice",
+        description: `• Appears when there is mud and cold or frigid temperatures.
+• Adventurer speeds halved for all purposes; roads provide no benefit; wheeled vehicles cannot move.
+
+<b>Frozen</b>
+Appears on a cold or frigid day with mud`
+    }
+};
+
+// Placeholder for altitudes (2,000 ft increments up to 20,000 ft)
+const ALTITUDE_TIERS = [
+    { value: 0,     label: "Sea Level to 2,000 ft",         tempMod: 0 },
+    { value: 2000,  label: "Low Hills (2,000–4,000 ft)",     tempMod: -1 },
+    { value: 4000,  label: "High Hills (4,000–6,000 ft)",    tempMod: -2 },
+    { value: 6000,  label: "Low Mtns (6,000–8,000 ft)",      tempMod: -3 },
+    { value: 8000,  label: "Mid Mtns (8,000–10,000 ft)",     tempMod: -4 },
+    { value: 10000, label: "High Mtns (10,000–12,000 ft)",   tempMod: -5 },
+    { value: 12000, label: "Alpine Tier 1 (12,000–14,000 ft)", tempMod: -6 },
+    { value: 14000, label: "Alpine Tier 2 (14,000–16,000 ft)", tempMod: -7 },
+    { value: 16000, label: "High Alpine (16,000–18,000 ft)", tempMod: -8 },
+    { value: 18000, label: "Extreme Alpine (18,000–20,000 ft)", tempMod: -9 },
+    { value: 20000, label: "Death Zone (20,000+ ft)",        tempMod: -10 }
+];
+
+// Global State
+let currentSelectedTerrain = terrainCodes[0];
+let currentSeason = "winter";
+let currentModifiedResult = null;
+let rollHistory = [];
+let favorites = new Set();
+let currentAltitudeStep = 0; // Default to Sea Level
+// Initialize global tracking variable if not already declared
+let currentAltitudeFt = 0;
+//the altitude of the current day should get inherited into the next days elevation
+
+
+// Load initial saved favorites from localStorage
+try {
+    const savedFavs = JSON.parse(localStorage.getItem("acks_fav_terrains") || "[]");
+    favorites = new Set(savedFavs);
+} catch (e) {
+    favorites = new Set();
+}
+
+function getTerrain(code) {
+    return terrainCodes.find(t => t.Code === code) || terrainCodes[0];
+}
+
+function selectTerrain(code) {
+    currentSelectedTerrain = getTerrain(code);
+
+    // Update display & tooltip
+    updateActiveTerrainTooltip();
+
+    
+    // Update active highlight in table
+    const rows = document.querySelectorAll("#terrainTable tbody tr");
+    rows.forEach(row => {
+        if (row.getAttribute("data-code") === currentSelectedTerrain.Code) {
+            row.classList.add("selected");
+        } else {
+            row.classList.remove("selected");
+        }
+    });
+}
+
+
+
+/**
+ * Calculates new weather values, constructs the history record, and triggers UI updates.
+ */
+function generateWeather() {
+    const diceDayTemp = roll2d6();
+    const diceNightTemp = diceDayTemp; // Night temp uses same base roll
+    const dicePrecip = roll2d6();
+    const diceWind = roll2d6();
+
+    const seasonMods = currentSelectedTerrain.modifiers[currentSeason];
+
+    // Base Terrain & Season Modifiers
+    const baseDayTempMod   = seasonMods.tDay;
+    const baseNightTempMod = seasonMods.tNight;
+    const basePrecipMod    = seasonMods.p;
+    const baseWindMod      = seasonMods.w;
+
+    // Retrieve Altitude Modifier from current elevation setting
+    const mainElevationInput = document.getElementById("ElevationInput");
+    const currentElevationFt = mainElevationInput 
+        ? (parseInt(mainElevationInput.value, 10) || 0) 
+        : (typeof currentAltitudeFt !== 'undefined' ? currentAltitudeFt : 0); 
+    const altitudeMod = getAltitudeModifier(currentElevationFt);
+
+    // Initial modified results before Weather Fronts (incorporates base + altitude)
+    let totalDayTemp   = clampIndex(diceDayTemp + baseDayTempMod + altitudeMod);
+    let totalNightTemp = clampIndex(diceNightTemp + baseNightTempMod + altitudeMod);
+    let totalPrecip    = clampIndex(dicePrecip + basePrecipMod);
+    let totalWind      = clampIndex(diceWind + baseWindMod);
+
+    // Get previous day's history item
+    const prevDay = rollHistory.length > 0 ? rollHistory[0] : null;
+
+    // Calculate Weather Front shifts
+    const frontDayTemp   = applyWeatherFront(diceDayTemp, totalDayTemp, prevDay?.dayTempModified);
+    const frontNightTemp = applyWeatherFront(diceNightTemp, totalNightTemp, prevDay?.nightTempModified);
+    const frontPrecip    = applyWeatherFront(dicePrecip, totalPrecip, prevDay?.precipModified);
+    const frontWind      = applyWeatherFront(diceWind, totalWind, prevDay?.windModified);
+
+    // Total net modifiers applied to the raw dice rolls (Season/Terrain + Altitude + Fronts)
+    const netDayTempMod   = baseDayTempMod + altitudeMod + frontDayTemp.frontMod;
+    const netNightTempMod = baseNightTempMod + altitudeMod + frontNightTemp.frontMod;
+    const netPrecipMod    = basePrecipMod + frontPrecip.frontMod;
+    const netWindMod      = baseWindMod + frontWind.frontMod;
+
+    // Process Day Details using the external helper
+    const dayDetails = getWeatherDetails(
+        diceDayTemp, 
+        dicePrecip, 
+        diceWind, 
+        netDayTempMod, 
+        netPrecipMod, 
+        netWindMod
+        // Leaves 7th param null so day evaluates netDayTempMod <= 0
+    );
+
+    // Process Night Details using the external helper
+    const nightDetails = getWeatherDetails(
+        diceNightTemp, 
+        dicePrecip, 
+        diceWind, 
+        netNightTempMod, 
+        netPrecipMod, 
+        netWindMod, 
+        dayDetails.selectedTableKey // Pass daytime's table choice to force night to match
+    );
+
+    // Calculate ground counters sequentially using processed strings
+    const { dayCounters, nightCounters } = calculateDayAndNightCounters(
+        dayDetails.precipText, dayDetails.tempText, 
+        nightDetails.precipText, nightDetails.tempText
+    );
+
+    // Construct full history entry
+    const historyItem = {
+        rollTemp: diceDayTemp,
+        rollPrecip: dicePrecip,
+        rollWind: diceWind,
+        dayTempModified: dayDetails.totalTemp,
+        nightTempModified: nightDetails.totalTemp,
+        precipModified: dayDetails.totalPrecip,
+        windModified: dayDetails.totalWind,
+        frontsApplied: { //stores the previous total to determine the next days weatherfronts
+            dayTemp: frontDayTemp.frontMod,
+            nightTemp: frontNightTemp.frontMod,
+            precip: frontPrecip.frontMod,
+            wind: frontWind.frontMod
+        },
+        modifiers: {
+            dayTemp: baseDayTempMod,
+            nightTemp: baseNightTempMod,
+            precip: basePrecipMod,
+            wind: baseWindMod,
+            altitude: altitudeMod
+        },
+        terrainCode: currentSelectedTerrain.Code,
+        terrainName: currentSelectedTerrain.Name,
+        season: currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1),
+        day: {
+            temp: dayDetails.tempText,
+            precip: dayDetails.precipText,
+            wind: dayDetails.windText
+        },
+        night: {
+            temp: nightDetails.tempText,
+            precip: nightDetails.precipText,
+            wind: nightDetails.windText
+        },
+        counter: nightCounters,
+        dayCounter: dayCounters,
+        add7mudnextday: false,
+        add7snownextday: false,
+        altitudeStep: altitudeMod,
+        altitudeFt:currentElevationFt,
+    };
+
+    // Save state
+    try {
+        localStorage.setItem(TERRAIN_STORAGE_KEY, currentSelectedTerrain.Code);
+    } catch (e) {
+        console.error("Could not save selected terrain to localStorage", e);
+    }
+
+    // Add entry to history state array
+    addHistoryEntry(historyItem);
+
+    // Render active UI states directly from state
+    renderDayNightUI();
+}
+
+function renderHistory() {
+    const historyContainer = document.getElementById("rollHistory");
+    historyContainer.innerHTML = "";
+
+    if (rollHistory.length === 0) {
+        historyContainer.innerHTML = `
+            <div style="color: var(--text-dim); font-size: 0.85rem; text-align: center; margin-top: 20px;">
+                No rolls generated yet.
+            </div>`;
+        return;
+    }
+
+    const escapeHtmlAttr = (str) => {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    };
+
+    const formatChip = (text, chipType) => {
+        const effect = getWeatherEffectInfo(text);
+        let tipAttr = '';
+        
+        if (effect) {
+            const rawTip = `<b style="font-size: 0.9em; display: block; margin-bottom: 4px;">${effect.title}</b>${effect.description}`;
+            tipAttr = `data-corner-tip="${escapeHtmlAttr(rawTip)}"`;
+        }
+        
+        return `<span class="chip ${chipType}" ${tipAttr}>${text}</span>`;
+    };
+
+    rollHistory.forEach((item, idx) => {
+        const card = document.createElement("div");
+        card.className = "history-card";
+
+        const entryNumber = rollHistory.length - idx;
+
+        // Ensure altitude exists on item, default to 0
+        const altitudeFt = item.altitudeFt || 0;
+        const altMod = getAltitudeModifier(altitudeFt);
+
+        // Compute Total Modifiers for this specific history item including altitude
+        const dayTempMod   = item.modifiers.dayTemp + (item.frontsApplied?.dayTemp || 0) + altMod;
+        const nightTempMod = item.modifiers.nightTemp + (item.frontsApplied?.nightTemp || 0) + altMod;
+        const precipMod    = item.modifiers.precip + (item.frontsApplied?.precip || 0);
+        const windMod      = item.modifiers.wind + (item.frontsApplied?.wind || 0);
+
+        // Calculate dynamic weather details (Day evaluates <=0, Night matches Day's table selection)
+        const dayDetails = getWeatherDetails(
+            item.rollTemp, item.rollPrecip, item.rollWind,
+            dayTempMod, precipMod, windMod
+        );
+
+        const nightDetails = getWeatherDetails(
+            item.rollTemp, item.rollPrecip, item.rollWind,
+            nightTempMod, precipMod, windMod,
+            dayDetails.selectedTableKey // Overrides night's table selection to match day
+        );
+
+        // Build Chips
+        const dayTempChip   = formatChip(dayDetails.tempText, "chip-temp");
+        const dayPrecipChip = formatChip(dayDetails.precipText, "chip-precip");
+        const dayWindChip   = formatChip(dayDetails.windText, "chip-wind");
+
+        const nightTempChip   = formatChip(nightDetails.tempText, "chip-temp");
+        const nightPrecipChip = formatChip(nightDetails.precipText, "chip-precip");
+        const nightWindChip   = formatChip(nightDetails.windText, "chip-wind");
+
+        const dayGroundCondition   = determineGround(item.dayCounter || item.counter, dayDetails.tempText);
+        const nightGroundCondition = determineGround(item.counter, nightDetails.tempText);
+
+        const groundDayChips   = dayGroundCondition ? formatChip(dayGroundCondition, "chip-ground") : "";
+        const groundNightChips = nightGroundCondition ? formatChip(nightGroundCondition, "chip-ground") : "";
+
+        const c = item.counter || {};
+        const counterInfoStr = `Mud (${c.mud || 0}/7), Snow (${c.snow || 0}/7), Ice (${c.ice ? 'Yes' : 'No'}), 
+Rain streak: ${c.rain || 0}, Drizzle streak: ${c.drizzly || 0}, 
+Snowy streak: ${c.snowy || 0}, Flurry streak: ${c.flurry || 0}`;
+
+        card.innerHTML = `
+            <div class="history-header">
+                <span class="history-title-container" data-tooltip="${item.terrainName} (${item.terrainCode} - ${item.season})\n${counterInfoStr}">
+                    <span class="history-entry-num">${entryNumber}</span>
+                    <span class="history-terrain-name">${item.terrainName}</span>
+                    <span style="font-size: 0.75rem; opacity: 0.8; white-space: nowrap;">(${item.season})</span>
+                </span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="history-roll-badge" data-tooltip="(Modifiers) Temp: [${item.modifiers.dayTemp}/${item.modifiers.nightTemp}] Precip: [${item.modifiers.precip}] Wind: [${item.modifiers.wind}]\n(Fronts) Temp: [${item.frontsApplied.dayTemp}/${item.frontsApplied.nightTemp}] Precip: [${item.frontsApplied.precip}] Wind: [${item.frontsApplied.wind}]\n(Altitude Mod) Temp: [${altMod}]\n(Totals) Temp: [${dayDetails.totalTemp}/${nightDetails.totalTemp}] Precip: [${dayDetails.totalPrecip}] Wind: [${dayDetails.totalWind}]\n${counterInfoStr}">
+                        Rolls: ${item.rollTemp} ${item.rollPrecip} ${item.rollWind}
+                    </span>
+                    <button class="btn-delete-history" onclick="deleteHistoryEntry(${idx})" title="Remove result">✕</button>
+                </div>
+            </div>
+
+<!-- Altitude Adjustment Bar with Stepper Buttons -->
+<div class="history-altitude-bar">
+    <span class="elevation-label">Elevation:</span>
+    
+    <div class="elevation-input-wrapper mini-elevation">
+        <button 
+            type="button" 
+            class="elevation-btn btn-minus" 
+            onclick="stepHistoryAltitude(${idx}, -2000)" 
+            aria-label="Decrease elevation by 2000 feet"
+        >−</button>
+        
+        <input 
+            type="number" 
+            id="alt-input-${idx}" 
+            class="elevation-input" 
+            value="${altitudeFt}" 
+            step="2000" 
+            min="0" 
+            max="20000"
+            oninput="${idx === 0 ? 'syncElevationValues(this.value)' : `updateHistoryAltitude(${idx}, this.value)`}"
+        />
+        
+        <button 
+            type="button" 
+            class="elevation-btn btn-plus" 
+            onclick="stepHistoryAltitude(${idx}, 2000)" 
+            aria-label="Increase elevation by 2000 feet"
+        >+</button>
+    </div>
+
+    <span class="alt-unit">ft</span>
+    <span class="alt-mod-badge">Modifier: ${altMod >= 0 ? '+' : ''}${altMod}</span>
+</div>
+
+            <div class="history-section history-day">
+                <span class="history-section-label">day</span>
+                <div class="chip-container">
+                    ${dayTempChip}
+                    ${dayPrecipChip}
+                    ${dayWindChip}
+                    ${groundDayChips}
+                </div>
+            </div>
+
+            <div class="history-section history-night">
+                <span class="history-section-label">night</span>
+                <div class="chip-container">
+                    ${nightTempChip}
+                    ${nightPrecipChip}
+                    ${nightWindChip}
+                    ${groundNightChips}
+                </div>
+            </div>
+        `;
+        historyContainer.appendChild(card);
+    });
+}
+
+// Update selectSeason to also refresh the tooltip when season changes
+function selectSeason(season) {
+    currentSeason = season;
+
+    // Save season to localStorage
+    try {
+        localStorage.setItem(SEASON_STORAGE_KEY, season);
+    } catch (e) {
+        console.error("Could not save season to localStorage", e);
+    }
+
+    const buttons = document.querySelectorAll("#seasonBtnGroup .btn-season");
+    buttons.forEach(btn => {
+        if (btn.getAttribute("data-season") === season) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+
+    // Refresh active terrain tooltip with new season modifiers
+    updateActiveTerrainTooltip();
+}
+
+function roll2d6() {
+    const die1 = Math.floor(Math.random() * 6) + 1;
+    const die2 = Math.floor(Math.random() * 6) + 1;
+    return die1 + die2;
+}
+
+function formatMod(val) {
+    return val >= 0 ? `+${val}` : `${val}`;
+}
+
+
+function updateResultRowTip(elementId, resultText) {
+    const row = document.getElementById(elementId)?.closest(".result-row");
+    if (!row) return;
+
+    const effect = getWeatherEffectInfo(resultText);
+    if (effect) {
+        row.setAttribute("data-corner-tip", `<b style="font-size: 0.9em; display: block;">${effect.title}</b>${effect.description}`);
+    } else {
+        row.removeAttribute("data-corner-tip");
+    }
+}
+
+/**
+ * Adjusts a single rolled stat by shifting its total 1 point toward the previous day's modified result.
+ * @param {number} diceRoll - The raw 2d6 roll (2-12).
+ * @param {number} currentTotal - The current day's calculated total modifier/value before fronts.
+ * @param {number|undefined} prevTotal - The previous day's final modified total.
+ * @returns {{ finalTotal: number, frontMod: number }}
+ */
+function applyWeatherFront(diceRoll, currentTotal, prevTotal) {
+    // 1. Extreme rolls (2 or 12) ignore weather fronts
+    // 2. If there is no previous day history, no front applies
+    // 3. If already identical to previous day, no shift needed
+    if (diceRoll === 2 || diceRoll === 12 || prevTotal === undefined || currentTotal === prevTotal) {
+        return { finalTotal: currentTotal, frontMod: 0 };
+    }
+
+    // Shift 1 point toward previous day's result
+    if (currentTotal < prevTotal) {
+        return { finalTotal: currentTotal + 1, frontMod: 1 };
+    } else {
+        return { finalTotal: currentTotal - 1, frontMod: -1 };
+    }
+}
+
+function evaluateSingleGroundStep(prevState, precipText, tempText, incrementStreaks = true) {
+    let { 
+        drizzly = 0, flurry = 0, snowy = 0, rain = 0, 
+        snow = 0, mud = 0, ice = false,
+        add7mudnextday = false, add7snownextday = false 
+    } = prevState || {};
+
+    const lowerPrecip = precipText.toLowerCase();
+    const lowerTemp   = tempText.toLowerCase();
+
+    const isSweltering   = lowerTemp.includes("sweltering");
+    const isModerate     = lowerTemp.includes("chilly") || lowerTemp.includes("brisk") || 
+                           lowerTemp.includes("balmy") || lowerTemp.includes("warm") || lowerTemp.includes("hot");
+    const isColdOrFrigid = lowerTemp.includes("cold") || lowerTemp.includes("frigid");
+    const isFair         = lowerPrecip.includes("clear") || lowerPrecip.includes("cloudy") || 
+                           lowerPrecip.includes("overcast") || lowerPrecip.includes("sunbaked");
+
+
+    const daytime = incrementStreaks;
+
+    // 1. Apply ground duration triggers set from the PREVIOUS day's threshold hit when it's daytime and not the night of the same day
+    if (daytime) {
+        if (add7mudnextday) mud = 7;
+        if (add7snownextday) snow = 7;
+    }
+
+    // Reset next-day flags before checking current day's precipitation
+    add7mudnextday = false;
+    add7snownextday = false;
+
+    // 2. Update precipitation streak counters
+    if (daytime) {
+        rain    = lowerPrecip.includes("rainy")   ? rain + 1    : 0;
+        drizzly = lowerPrecip.includes("drizzly") ? drizzly + 1 : 0;
+        snowy   = lowerPrecip.includes("snowy")   ? snowy + 1   : 0;
+        flurry  = lowerPrecip.includes("flurry")  ? flurry + 1  : 0;
+    }
+
+    // 3. Queue mud/snow to trigger TOMORROW if threshold is met today
+    if (rain >= 1 || drizzly >= 3) add7mudnextday = true;
+    if (snowy >= 1 || flurry >= 3) add7snownextday = true;
+
+    if(daytime){
+        // 4. Process Mud Decay & Ice Transformation
+        ice = false;
+        if (mud > 0) {
+            if (isSweltering) {
+                mud = 0;
+            } else if (isColdOrFrigid) {
+                ice = true;
+            } else if (isModerate && isFair) {
+                mud = Math.max(0, mud - 1);
+            }
+        }
+
+        // 5. Process Snow Melting
+        if (snow > 0) {
+            if (isSweltering) { 
+                snow = 0;
+                mud = 0;
+            } 
+            if (isModerate) {
+                snow = Math.max(0, snow - 1);
+            }
+            if (snow === 0) add7mudnextday = true; // Melting snow creates mud tomorrow
+        }
+    }
+    return { drizzly, flurry, snowy, rain, snow, mud, ice, add7mudnextday, add7snownextday };
+}
+
+
+function calculateDayAndNightCounters(dayPrecip, dayTemp, nightPrecip, nightTemp) {
+    const initialState = (rollHistory.length > 0 && rollHistory[0].counter) 
+        ? rollHistory[0].counter 
+        : { drizzly: 0, flurry: 0, snowy: 0, rain: 0, snow: 0, mud: 0, ice: false };
+
+    // Step 1: Evaluate Day and update streak counters once for the day
+    const dayCounters = evaluateSingleGroundStep(initialState, dayPrecip, dayTemp, true);
+
+    // Step 2: Evaluate Night using dayCounters state, but without re-incrementing streak counters
+    const nightCounters = evaluateSingleGroundStep(dayCounters, nightPrecip, nightTemp, false);
+
+    return { dayCounters, nightCounters };
+}
+
+/**
+ * Determines active ground condition based on priority: Snow > Ice/Frozen Mud > Mud.
+ * @param {Object} counter - Ground states object.
+ * @param {string} tempText - Current temperature text (e.g., "Cold", "Frigid", "Balmy").
+ * @returns {string|null}
+ */
+function determineGround(counter = {}, tempText = '') {
+    if (counter.snow >= 1) return 'Snow';
+
+    const lowerTemp = (tempText || '').toLowerCase();
+    const isCold = lowerTemp.includes('cold') || lowerTemp.includes('frigid');
+
+    // If explicit Ice is true OR Mud exists under cold temperatures
+    if (counter.ice || (counter.mud >= 1 && isCold)) {
+        return 'Ice';
+    }
+
+    if (counter.mud >= 1) return 'Mud';
+
+    return null;
+}
+
+
+
+function buildGroundChipHtml(counter, tempText = '') {
+    if (!counter) return '';
+    const text = determineGround(counter, tempText);
+
+    if (!text) return '';
+
+    const effect = getWeatherEffectInfo(text);
+    let tipAttr = '';
+    if (effect) {
+        const escapeAttr = (s) => s.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const rawTip = `<b style="font-size: 0.9em; display: block; margin-bottom: 4px;">${effect.title}</b>${effect.description}`;
+        tipAttr = `data-corner-tip="${escapeAttr(rawTip)}"`;
+    }
+
+    return `<span class="chip-ground-result" ${tipAttr}>${text}</span>`;
+}
+
+
+/**
+ * Calculates altitude modifier step for a given elevation in feet.
+ * Every 2,000 ft provides a -1 penalty to the temperature roll.
+ * @param {number} altitudeFt - Elevation in feet.
+ * @returns {number} Temperature modifier based on altitude.
+ */
+function getAltitudeModifier(altitudeFt) {
+    if (!altitudeFt || altitudeFt <= 0) return 0;
+    
+    // Finds the highest tier matching or below the provided elevation
+    let modifier = 0;
+    for (let i = ALTITUDE_TIERS.length - 1; i >= 0; i--) {
+        if (altitudeFt >= ALTITUDE_TIERS[i].value) {
+            modifier = ALTITUDE_TIERS[i].tempMod;
+            break;
+        }
+    }
+    return modifier;
+}
+
+function clampIndex(val) {
+    if (val <= -7) return -7;
+    if (val >= 19) return 19;
+    return val;
+}
+
+/**
+ * Adjusts elevation by a given step delta (e.g., +2000 or -2000).
+ * Keeps elevation bounded above or at 0.
+ * @param {number} delta - The amount to increase or decrease elevation.
+ */
+function adjustElevation(delta) {
+    const mainInput = document.getElementById("mainElevationInput");
+    if (!mainInput) return;
+
+    let currentValue = parseInt(mainInput.value, 10) || 0;
+    let newValue = currentValue + delta;
+
+    syncElevationValues(newValue);
+}
+
+/**
+ * Calculates modified rolls and retrieves the final text details for temperature, precipitation, and wind.
+ * @param {number} rawTempRoll - The base 2d6 temperature roll.
+ * @param {number} rawPrecipRoll - The base 2d6 precipitation roll.
+ * @param {number} rawWindRoll - The base 2d6 wind roll.
+ * @param {number} tempMod - Total temperature modifier (base season/terrain + front + altitude).
+ * @param {number} precipMod - Total precipitation modifier.
+ * @param {number} windMod - Total wind modifier.
+ * @param {string} [forceTableChoice] - Optional override ('tempGtr0' or 'tempLeq0') to force column selection.
+ * @returns {{ tempText: string, precipText: string, windText: string, totalTemp: number, totalPrecip: number, totalWind: number, selectedTableKey: string }}
+ */
+function getWeatherDetails(rawTempRoll, rawPrecipRoll, rawWindRoll, tempMod, precipMod, windMod, forceTableChoice = null) {
+    // 1. Calculate final clamped table indices (-7 to 19)
+    const totalTemp   = clampIndex(rawTempRoll + tempMod);
+    const totalPrecip = clampIndex(rawPrecipRoll + precipMod);
+    const totalWind   = clampIndex(rawWindRoll + windMod);
+
+    // 2. Fetch table rows
+    const tempRow   = weatherResultsTable[totalTemp]; 
+    const precipRow = weatherResultsTable[totalPrecip];
+    const windRow   = weatherResultsTable[totalWind];
+
+    // 3. Determine which column key to use:
+    // If an explicit override is provided, use it; otherwise evaluate tempMod <= 0.
+    const selectedTableKey = forceTableChoice ? forceTableChoice : ((tempMod <= 0) ? 'tempLeq0' : 'tempGtr0');
+    const tempText = tempRow[selectedTableKey];
+
+    // 4. Adjust precipitation for cold/frigid conditions (Rainy -> Snowy, Drizzly -> Flurry)
+    const lowerTemp = tempText.toLowerCase();
+    let precipText  = precipRow.precipitation;
+    if (lowerTemp.includes("cold") || lowerTemp.includes("frigid")) {
+        if (precipText === "Rainy") precipText = "Snowy";
+        if (precipText === "Drizzly") precipText = "Flurry";
+    }
+
+    // 5. Format wind label
+    const windText = windRow.wind.toLowerCase().includes('wind') ? windRow.wind : `${windRow.wind} wind`;
+
+    return {
+        tempText,
+        precipText,
+        windText,
+        totalTemp,
+        totalPrecip,
+        totalWind,
+        selectedTableKey // Returned so callers (like Night UI) know what Day selected
+    };
+}
+
+
+/**
+ * Renders the primary Day/Night UI elements directly from state/rollHistory.
+ */
+function renderDayNightUI() {
+    if (!rollHistory || rollHistory.length === 0) return;
+
+    const latest = rollHistory[0];
+
+    // 1. Fetch current elevation and calculate effective altitude modifier
+    const altitudeFt = latest.altitudeFt !== undefined ? latest.altitudeFt : (currentAltitudeFt || 0);
+    const altMod = getAltitudeModifier(altitudeFt);
+
+    // 2. Compute dynamic effective temperature modifiers
+    const effectiveDayTempMod = latest.modifiers.dayTemp + (latest.frontsApplied?.dayTemp || 0) + altMod;
+    const effectiveNightTempMod = latest.modifiers.nightTemp + (latest.frontsApplied?.nightTemp || 0) + altMod;
+    const effectivePrecipMod = latest.modifiers.precip + (latest.frontsApplied?.precip || 0);
+    const effectiveWindMod = latest.modifiers.wind + (latest.frontsApplied?.wind || 0);
+
+    // 3. Re-evaluate weather descriptions and totals
+    // DAYTIME: Evaluates effectiveDayTempMod to decide if <= 0 or > 0 table applies
+    const dayDetails = getWeatherDetails(
+        latest.rollTemp, 
+        latest.rollPrecip, 
+        latest.rollWind,
+        effectiveDayTempMod, 
+        effectivePrecipMod, 
+        effectiveWindMod
+    );
+
+    // NIGHTTIME: Overrides the <= 0 rule and reuses daytime's chosen table key
+    const nightDetails = getWeatherDetails(
+        latest.rollTemp, 
+        latest.rollPrecip, 
+        latest.rollWind,
+        effectiveNightTempMod, 
+        effectivePrecipMod, 
+        effectiveWindMod,
+        dayDetails.selectedTableKey // Overrides night's table selection to match day
+    );
+
+    const dayFrontModStr = `${formatMod(dayDetails.totalTemp - latest.rollTemp)} | ${formatMod(dayDetails.totalPrecip - latest.rollPrecip)} | ${formatMod(dayDetails.totalWind - latest.rollWind)}`;
+    const nightFrontModStr = `${formatMod(nightDetails.totalTemp - latest.rollTemp)} | ${formatMod(dayDetails.totalPrecip - latest.rollPrecip)} | ${formatMod(dayDetails.totalWind - latest.rollWind)}`;
+
+    const buildFrontTooltip = (baseTempMod, frontTempMod, frontPrecipMod, frontWindMod) => {
+        return `Base Mods: Temp ${formatMod(baseTempMod)}, Precip ${formatMod(latest.modifiers.precip)}, Wind ${formatMod(latest.modifiers.wind)}\n` +
+               `Altitude Penalty: Temp ${formatMod(altMod)}\n` +
+               `Weather Fronts: Temp ${formatMod(frontTempMod)}, Precip ${formatMod(frontPrecipMod)}, Wind ${formatMod(frontWindMod)}`;
+    };
+
+    // Update Header Summary
+    document.getElementById("diceRoll").textContent = `${latest.rollTemp} | ${latest.rollPrecip} | ${latest.rollWind}`;
+    document.getElementById("modifiedRollDisplay").textContent = 
+        `( ${dayDetails.totalTemp}/${nightDetails.totalTemp} | ${dayDetails.totalPrecip} | ${dayDetails.totalWind} )`;
+
+    // Ground Chips
+    // Update Ground Chips to pass calculated temperature text
+    document.getElementById("dayGroundChip").innerHTML = buildGroundChipHtml(latest.dayCounter, dayDetails.tempText);
+    document.getElementById("nightGroundChip").innerHTML = buildGroundChipHtml(latest.counter, nightDetails.tempText);
+
+// Day Panel UI
+    const dayModsEl = document.getElementById("dayModsDisplay");
+    dayModsEl.textContent = `(${dayFrontModStr})`;
+    dayModsEl.setAttribute("data-tooltip", buildFrontTooltip(
+        latest.modifiers.dayTemp, 
+        latest.frontsApplied.dayTemp, 
+        latest.frontsApplied.precip, 
+        latest.frontsApplied.wind
+    ));
+
+    document.getElementById("dayTempResult").textContent = dayDetails.tempText;
+    document.getElementById("dayPrecipResult").textContent = dayDetails.precipText;
+    document.getElementById("dayWindResult").textContent = dayDetails.windText;
+    document.getElementById("dayTempRoll").textContent = `(${dayDetails.totalTemp})`;
+    document.getElementById("dayPrecipRoll").textContent = `(${dayDetails.totalPrecip})`;
+    document.getElementById("dayWindRoll").textContent = `(${dayDetails.totalWind})`;
+
+    // Night Panel UI
+    const nightModsEl = document.getElementById("nightModsDisplay");
+    nightModsEl.textContent = `(${nightFrontModStr})`;
+    nightModsEl.setAttribute("data-tooltip", buildFrontTooltip(
+        latest.modifiers.nightTemp, 
+        latest.frontsApplied.nightTemp, 
+        latest.frontsApplied.precip, 
+        latest.frontsApplied.wind
+    ));
+
+    document.getElementById("nightTempResult").textContent = nightDetails.tempText;
+    document.getElementById("nightPrecipResult").textContent = nightDetails.precipText;
+    document.getElementById("nightWindResult").textContent = nightDetails.windText;
+    document.getElementById("nightTempRoll").textContent = `(${nightDetails.totalTemp})`;
+    document.getElementById("nightPrecipRoll").textContent = `(${nightDetails.totalPrecip})`;
+    document.getElementById("nightWindRoll").textContent = `(${nightDetails.totalWind})`;
+
+    // Update Rule Tooltips
+    updateResultRowTip("dayTempResult", dayDetails.tempText);
+    updateResultRowTip("dayPrecipResult", dayDetails.precipText);
+    updateResultRowTip("dayWindResult", dayDetails.windText);
+
+    updateResultRowTip("nightTempResult", nightDetails.tempText);
+    updateResultRowTip("nightPrecipResult", nightDetails.precipText);
+    updateResultRowTip("nightWindResult", nightDetails.windText);
+}
+
+
+function addHistoryEntry(entry) {
+    rollHistory.unshift(entry);
+    if (rollHistory.length > 30) { 
+        rollHistory.pop();
+    }
+
+    renderHistory();
+    saveHistoryToLocalStorage(rollHistory);
+}
+
+function deleteHistoryEntry(index) {
+    rollHistory.splice(index, 1);
+    renderHistory();
+    saveHistoryToLocalStorage(rollHistory);
+}
+
+
+/**
+ * Adjusts elevation for a specific history card via +/- buttons.
+ * @param {number} idx - Index of the history entry.
+ * @param {number} delta - The change in feet (e.g. +2000 or -2000).
+ */
+function stepHistoryAltitude(idx, delta) {
+    const input = document.getElementById(`alt-input-${idx}`);
+    if (!input) return;
+
+    let currentValue = parseInt(input.value, 10) || 0;
+    let newValue = Math.max(0, Math.min(20000, currentValue + delta));
+
+    // If it's the newest entry (index 0), sync both inputs
+    if (idx === 0) {
+        syncElevationValues(newValue);
+    } else {
+        input.value = newValue;
+        updateHistoryAltitude(idx, newValue);
+    }
+}
+
+/**
+ * Updates the altitude for a specific history entry and re-renders history.
+ * @param {number} index - Index of the item in rollHistory array.
+ * @param {string|number} newAltitude - The new altitude value entered by the user.
+ */
+function updateHistoryAltitude(index, newAltitude) {
+    const parsedAlt = parseInt(newAltitude, 10);
+    rollHistory[index].altitudeFt = isNaN(parsedAlt) ? 0 : parsedAlt;
+    renderHistory();
+    if (index === 0) {
+        renderDayNightUI();
+    }
+}
+
+
+
+
+
+function copyHistoryToClipboard() {
+    if (rollHistory.length === 0) {
+        showCopyToast("No history!");
+        return;
+    }
+
+    const formattedText = rollHistory.map(item => {
+        const c = item.counter || {};
+        return `${item.terrainName} (${item.season}) Roll: ${item.rollTemp} / ${item.rollPrecip} / ${item.rollWind}     (Fronts) Temp: [${item.frontsApplied.dayTemp}/${item.frontsApplied.nightTemp}] Precip: [${item.frontsApplied.precip}] Wind: [${item.frontsApplied.wind}]      (Totals) Temp: [${item.dayTempModified}/${item.nightTempModified}] Precip: [${item.precipModified}] Wind: [${item.windModified}]\n` +
+               `day: ${item.day.temp}, ${item.day.precip}, ${item.day.wind}\n` +
+               `night: ${item.night.temp}, ${item.night.precip}, ${item.night.wind}\n` +
+               `Mud [${c.mud||0}] Days left, Snow [${c.snow||0}] Days left, Mud is Ice? [${c.ice?'Yes':'No'}]`;
+    }).join("\n\n");
+
+    const textarea = document.createElement("textarea");
+    textarea.value = formattedText;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        document.execCommand('copy');
+        showCopyToast("Copied!");
+    } catch (err) {
+        showCopyToast("Failed");
+    } finally {
+        document.body.removeChild(textarea);
+    }
+}
+
+function showCopyToast(message) {
+    const btn = document.querySelector(".btn-copy-history");
+    if (!btn) return;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `✓ ${message}`;
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+    }, 1500);
+}
+
+// Unique keys for localStorage
+const HISTORY_STORAGE_KEY = 'weather_app_history';
+const TERRAIN_STORAGE_KEY = 'weather_app_selected_terrain';
+const SEASON_STORAGE_KEY = "selectedSeason";
+
+function saveHistoryToLocalStorage(historyData) {
+    try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(historyData));
+    } catch (error) {
+        console.error("Error saving history to localStorage:", error);
+    }
+}
+
+function loadHistoryFromLocalStorage() {
+    try {
+        const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+        return savedHistory ? JSON.parse(savedHistory) : [];
+    } catch (error) {
+        console.error("Error loading history from localStorage:", error);
+        return [];
+    }
+}
+
+function toggleDrawer(forceState) {
+    const drawer = document.getElementById('historyDrawer');
+    
+    const isCurrentlyOpen = drawer.classList.contains('open') || 
+        (window.innerWidth > 900 && !drawer.classList.contains('closed'));
+
+    const shouldOpen = typeof forceState === 'boolean' ? forceState : !isCurrentlyOpen;
+
+    if (shouldOpen) {
+        drawer.classList.add('open');
+        drawer.classList.remove('closed');
+    } else {
+        drawer.classList.remove('open');
+        drawer.classList.add('closed');
+    }
+
+    
+}
+
+function syncElevationValues(newValue) {
+    let parsedValue = parseInt(newValue, 10);
+    
+    if (isNaN(parsedValue) || parsedValue < 0) {
+        parsedValue = 0;
+    } else if (parsedValue > 20000) {
+        parsedValue = 20000;
+    }
+
+    currentAltitudeFt = parsedValue;
+
+    // Update main input
+    const mainInput = document.getElementById("mainElevationInput");
+    if (mainInput && mainInput.value != parsedValue) {
+        mainInput.value = parsedValue;
+    }
+
+    // Update history index 0 if history exists
+    if (typeof rollHistory !== "undefined" && rollHistory.length > 0) {
+        // Store value directly on history object so re-renders won't wipe it
+        rollHistory[0].altitudeFt = parsedValue; 
+
+        const newestInput = document.getElementById("alt-input-0");
+        if (newestInput && newestInput.value != parsedValue) {
+            newestInput.value = parsedValue;
+        }
+
+        if (typeof updateHistoryAltitude === "function") {
+            updateHistoryAltitude(0, parsedValue);
+        }
+    }
+}
+
+function getWeatherEffectInfo(text) {
+    if (!text || text === "-") return null;
+    const lower = text.toLowerCase();
+
+    // 1. Temperature checks
+    if (lower.includes("frigid")) return weatherEffects.frigid;
+    if (lower.includes("cold")) return weatherEffects.cold;
+    if (lower.includes("sweltering")) return weatherEffects.sweltering;
+    if (lower.includes("chilly") || lower.includes("brisk") || lower.includes("balmy") || lower.includes("warm") || lower.includes("hot")) {
+        return weatherEffects.moderate;
+    }
+
+    // 2. Precipitation checks
+    if (lower.includes("drizzly")) return weatherEffects.drizzly;
+    if (lower.includes("rainy")) return weatherEffects.rainy;
+    if (lower.includes("snowy")) return weatherEffects.snowy;
+    if (lower.includes("flurry") || lower.includes("flurries")) return weatherEffects.flurry;
+    if (lower.includes("sunbaked")) return weatherEffects.sunbaked;
+    if (lower.includes("clear") || lower.includes("cloudy") || lower.includes("overcast")) return weatherEffects.fair;
+
+    // 3. Wind checks
+    if (lower.includes("fog") || lower.includes("mist")) return weatherEffects.foggy;
+    if (lower.includes("stormy") || lower.includes("gale")) return weatherEffects.stormy;
+    if (lower.includes("windy") || lower.includes("very strong") || lower.includes("strong")) return weatherEffects.windy;
+    if (lower.includes("gentle") || lower.includes("moderate")|| lower.includes("still")) return weatherEffects.gentle;
+
+    // Ground checks
+    if (lower.includes("mud")) return weatherEffects.mud;
+    if (lower.includes("snow")) return weatherEffects.snow;
+    if (lower.includes("ice")) return weatherEffects.ice;
+
+    return null;
+}
+
+// Bind button event handler
+document.getElementById('toggleHistoryBtn').addEventListener('click', () => {
+    toggleDrawer();
+});
+
+function toggleFavorite(code) {
+    if (favorites.has(code)) {
+        favorites.delete(code);
+    } else {
+        favorites.add(code);
+    }
+    try {
+        localStorage.setItem("acks_fav_terrains", JSON.stringify(Array.from(favorites)));
+    } catch (e) {
+        // Handle localStorage restriction gracefully
+    }
+    buildTerrainTable();
+}
+
+function clearAllHistory() {
+    if (rollHistory.length === 0) return;
+    
+    rollHistory = []; // Empty history array
+    renderHistory();  
+
+    // Clear from localStorage
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+}
+
+function buildTerrainTable() {
+    const tbody = document.getElementById("terrainTable").querySelector("tbody");
+    tbody.innerHTML = "";
+
+    const sortedTerrains = [...terrainCodes].sort((a, b) => {
+        const aFav = favorites.has(a.Code);
+        const bFav = favorites.has(b.Code);
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
+        return 0;
+    });
+
+    sortedTerrains.forEach(item => {
+        const isFav = favorites.has(item.Code);
+        const tr = document.createElement("tr");
+        tr.setAttribute("data-code", item.Code);
+        if (isFav) {
+            tr.classList.add("favorited");
+        }
+        if (item.Code === currentSelectedTerrain.Code) {
+            tr.classList.add("selected");
+        }
+
+        tr.innerHTML = `
+            <td><span class="badge">${item.Code}</span></td>
+            <td><strong>${item.Name}</strong></td>
+            <td>${item.Biome}</td>
+            <td>${item.AcksType}</td>
+            <td class="action-cell">
+                <button class="btn-fav-mini ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">${isFav ? '★' : '☆'}</button>
+                <button class="btn-roll-mini" title="Select & Roll">🎲 Roll</button>
+            </td>
+        `;
+
+        tr.addEventListener("click", (e) => {
+            if (e.target.tagName === 'BUTTON') return;
+            selectTerrain(item.Code);
+        });
+
+        const favBtn = tr.querySelector(".btn-fav-mini");
+        favBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleFavorite(item.Code);
+        });
+
+        const rollBtn = tr.querySelector(".btn-roll-mini");
+        rollBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            selectTerrain(item.Code);
+            generateWeather();
+        });
+
+        tbody.appendChild(tr);
+    });
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-mode');
+    document.getElementById('themeIcon').textContent = isLight ? '🌙' : '☀️';
+    
+    try {
+        localStorage.setItem('acks_theme', isLight ? 'light' : 'dark');
+    } catch (e) {}
+}
+
+function updateActiveTerrainTooltip() {
+    const displayEl = document.getElementById("terrainNameDisplay");
+    const displayDm = document.getElementById("terrainDayModDisplay");
+    const displayNm = document.getElementById("terrainNightModDisplay");
+    const displayCd = document.getElementById("terrainCodeDisplay");   
+
+    if (!displayEl || !currentSelectedTerrain) return;
+
+    const mods = currentSelectedTerrain.modifiers[currentSeason];
+    const seasonLabel = currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1);
+
+    const dayModStr = `${formatMod(mods.tDay)} | ${formatMod(mods.p)} | ${formatMod(mods.w)}`;
+    const nightModStr = `${formatMod(mods.tNight)} | ${formatMod(mods.p)} | ${formatMod(mods.w)}`;
+
+    displayDm.textContent = `${dayModStr}`;
+    displayNm.textContent = `${nightModStr}`;
+    displayCd.textContent = `${currentSelectedTerrain.Code}`;
+
+    displayEl.setAttribute(
+        "data-tooltip", 
+        `(${currentSelectedTerrain.Code}) - ${currentSelectedTerrain.Name} (${seasonLabel})`
+    );
+}
+
+function setupGlobalTooltip() {
+    const tooltip = document.getElementById("globalTooltip");
+    const cornerTooltip = document.getElementById("cornerTooltip");
+
+    function updatePosition(target) {
+        if (!tooltip) return;
+        const rect = target.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        let top = rect.bottom + 6;
+        let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+        if (top + tooltipRect.height > window.innerHeight - 8) {
+            top = rect.top - tooltipRect.height - 6;
+        }
+
+        if (left < 8) left = 8;
+        if (left + tooltipRect.width > window.innerWidth - 8) {
+            left = window.innerWidth - tooltipRect.width - 8;
+        }
+
+        tooltip.style.top = `${top}px`;
+        tooltip.style.left = `${left}px`;
+    }
+
+    document.addEventListener("mouseover", (e) => {
+        const target = e.target.closest("[data-tooltip]");
+        if (target && tooltip) {
+            const text = target.getAttribute("data-tooltip");
+            if (text) {
+                tooltip.textContent = text;
+                tooltip.style.visibility = "visible";
+                tooltip.style.opacity = "1";
+                updatePosition(target);
+            }
+        }
+
+        const cornerTarget = e.target.closest("[data-corner-tip]");
+        if (cornerTarget && cornerTooltip) {
+            const tipText = cornerTarget.getAttribute("data-corner-tip");
+            if (tipText) {
+                cornerTooltip.innerHTML = tipText;
+                cornerTooltip.style.visibility = "visible";
+                cornerTooltip.style.opacity = "1";
+            }
+        }
+    });
+
+    document.addEventListener("mouseout", (e) => {
+        const target = e.target.closest("[data-tooltip]");
+        if (target && tooltip) {
+            const related = e.relatedTarget ? e.relatedTarget.closest("[data-tooltip]") : null;
+            if (related !== target) {
+                tooltip.style.visibility = "hidden";
+                tooltip.style.opacity = "0";
+            }
+        }
+
+        const cornerTarget = e.target.closest("[data-corner-tip]");
+        if (cornerTarget && cornerTooltip) {
+            const relatedCorner = e.relatedTarget ? e.relatedTarget.closest("[data-corner-tip]") : null;
+            if (relatedCorner !== cornerTarget) {
+                cornerTooltip.style.visibility = "hidden";
+                cornerTooltip.style.opacity = "0";
+            }
+        }
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        const target = e.target.closest("[data-tooltip]");
+        if (target && tooltip && tooltip.style.visibility === "visible") {
+            updatePosition(target);
+        }
+    }, { passive: true });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    buildTerrainTable();
+    setupGlobalTooltip();
+    
+
+    let savedTerrainCode = 'Af';
+    try {
+        savedTerrainCode = localStorage.getItem(TERRAIN_STORAGE_KEY) || 'Af';
+    } catch (e) {
+        savedTerrainCode = 'Af';
+    }
+
+    selectTerrain(savedTerrainCode);   
+
+    let savedSeason = 'winter';
+    try {
+        savedSeason = localStorage.getItem(SEASON_STORAGE_KEY) || 'winter';
+    } catch (e) {
+        console.error("Could not load season from localStorage", e);
+    }
+    
+    selectSeason(savedSeason);
+
+    rollHistory = loadHistoryFromLocalStorage();
+    renderHistory();
+    renderDayNightUI();
+});
+</script>
+
+</body>
+</html>
