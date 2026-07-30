@@ -2441,12 +2441,14 @@ function evaluateSingleGroundStep(prevState, precipText, tempText, incrementStre
             } else if (isModerate) {
                 snow = Math.max(0, snow - 1);
             }
+
+                    // Queue mud ONLY when snow naturally melts to 0 on moderate days
+        if (snow === 0) {
+            mud = 7;
+        }
         }
 
-        // Queue mud ONLY when snow naturally melts to 0 on moderate days
-        if (snow === 0) {
-            mud=7;
-        }
+
     }
 
     return { drizzly, flurry, snowy, rain, snow, mud, ice, add7mudnextday, add7snownextday };
